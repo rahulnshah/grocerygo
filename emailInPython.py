@@ -1,7 +1,9 @@
 import smtplib
 from email.message import EmailMessage
 
-
+'''
+Send emails with python using the following function 
+'''
 def email_content(body, s_address = "********", r_address = "*******", subject_line = ""):
     msg = EmailMessage()
     msg['Subject'] = subject_line
