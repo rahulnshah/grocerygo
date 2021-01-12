@@ -33,7 +33,7 @@ class Database:
 
     def update(self, id, shopping_item):  # needs an id to know which one we are updating
 
-        self.cur.execute("UPDATE items SET shopping_item = ?  WHERE id= ?",
+        self.cur.execute("UPDATE items SET shopping_item = ? WHERE id= ?",
                          ( shopping_item, id))
         self.conn.commit()
     # destructor --> called when all references to the object have been deleted
