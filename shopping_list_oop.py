@@ -13,7 +13,7 @@ class ShoppingList(tk.Frame):
     """
 
     def __init__(self, master, database):
-        super().__init__(master)  # again, what does this do?
+        super().__init__(master)  
         # background
         self.app_bg = tk.PhotoImage(file="images/notebook_paper.png")
         self.app_label = tk.Label(self.master, image=self.app_bg)
