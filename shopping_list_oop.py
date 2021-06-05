@@ -24,7 +24,7 @@ class ShoppingList(tk.Frame):
         self.app_label.place(x=0, y=0, relwidth=1, relheight=1)
 
         # Init selected item var
-        self.selected_item = 0.1# ????????????
+        self.selected_item = 0.1
         # shopping item
         self.shopping_item_text = tk.StringVar()
         self.shopping_item_label = tk.Label(self.master, text="Shopping Item", font=("bold", 14), pady=20)
