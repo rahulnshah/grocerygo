@@ -103,6 +103,8 @@ class ShoppingList(tk.Frame):
             # the line above gets the actual item from the shopping_list associated with its index
 
             # clear whatever is in the entry field from index 0 to the end of it
+            
+            # this is a comment 
             self.shopping_item_entry.delete(0, tk.END)
             self.shopping_item_entry.insert(tk.END, self.selected_item)            
         except IndexError:
