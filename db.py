@@ -1,6 +1,6 @@
 import sqlite3
 
-
+'''
 class Database:
     def __init__(self, db):
         # code below seems wierd, but all I am doing 
@@ -15,7 +15,7 @@ class Database:
         self.cur.execute("CREATE TABLE IF NOT EXISTS items (id integer primary key autoincrement, shopping_item text)")
         self.conn.commit() 
 
-    '''CRUD Operations'''
+    CRUD Operations
     def fetch(self):
         rw_data = self.cur.execute("SELECT * FROM items")
         rows = rw_data.fetchall()
@@ -41,7 +41,10 @@ class Database:
         self.conn.close()
 
 # A Database object
-# db = Database("database")
-# db.update(2,"asdsadfaf")
-# db.remove(2)
+db = Database('testdatabase.db')
+# db.insert("asdsadfaf")
 # print(db.fetch())
+'''
+
+
+
