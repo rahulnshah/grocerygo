@@ -11,7 +11,9 @@ A simple GUI application that not only allows one to add, update, and remove a s
 
 ![](README%20materials/shoppinglist%20screen.jpg)
 
-
+## TODO:
+- Be able to send all the items in the ListBox translated into Gujarati.
+- Add a short demo of the GUI interface to this README.
     
 ## Helpful resources:
 - [Set up 2-Step Verfication on my Google  account](https://towardsdatascience.com/automate-sending-emails-with-gmail-in-python-449cc0c3c317) 
