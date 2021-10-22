@@ -5,10 +5,10 @@ from email.message import EmailMessage
 Send emails with python using the following function 
 '''
     
-def email_content(body, s_address, r_address, subject_line):
+def email_content(body, r_address, subject_line):
     msg = EmailMessage()
     msg['Subject'] = subject_line
-    msg['From'] = s_address
+    # msg['From'] = s_address
     msg['To'] = r_address
     msg.set_content(body)
     # Create a secure SSL context
