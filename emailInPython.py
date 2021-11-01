@@ -1,19 +1,17 @@
 import smtplib, ssl
-from email.message import EmailMessage
 
-'''
-Send emails with python using the following function 
-'''
-    
-def email_content(body, s_address, r_address, subject_line):
-    msg = EmailMessage()
-    msg['Subject'] = subject_line
-    msg['From'] = s_address
-    msg['To'] = r_address
-    msg.set_content(body)
-    # Create a secure SSL context
+def email_content():
+    port = 465  # For SSL
+    smtp_server = "smtp.gmail.com"
+    sender_email = "my@gmail.com"  # Enter your address
+    receiver_email = "your@gmail.com"  # Enter receiver address
+    password = input("Type your password and press enter: ")
+    message = """\
+    Subject: Hi there
+
+    This message is sent from Python."""
+
     context = ssl.create_default_context()
-    with smtplib.SMTP_SSL('smtp.gmail.com' , 465, context = context) as server:
-        server.login("**************", "*************")
-        server.send_message(msg)
-        
+    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, message)
