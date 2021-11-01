@@ -4,7 +4,6 @@ def email_content(message, receiver_email):
     port = 465  # For SSL
     smtp_server = "smtp.gmail.com"
     sender_email = "my@gmail.com"  # Enter your address
-    # receiver_email = "your@gmail.com"  # Enter receiver address
     password = input("Type your password and press enter: ")
     message = "Grocery Shopping List\n" + message
 
