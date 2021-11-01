@@ -6,7 +6,7 @@ def email_content(message, receiver_email):
     sender_email = "my@gmail.com"  # Enter your address
     password = input("Type your password and press enter: ")
     message = "Grocery Shopping List\n" + message
-
+    # Create a secure SSL context
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
         server.login(sender_email, password)
