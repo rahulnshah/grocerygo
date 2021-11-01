@@ -116,17 +116,17 @@ class ShoppingList(tk.Frame):
             email_str = email_str + list_entry + "\n"
         top = tk.Toplevel(self.master)
         top.title("Email shopping list")
-        s_address_text = tk.StringVar()
+        # s_address_text = tk.StringVar()
         r_address_text = tk.StringVar()
-        s_l = tk.Label(top, text="From:")
-        s_l.pack()
-        e = tk.Entry(top, textvariable = s_address_text)
-        e.pack()
+        # s_l = tk.Label(top, text="From:")
+        # s_l.pack()
+        # e = tk.Entry(top, textvariable = s_address_text)
+        # e.pack()
         r = tk.Label(top, text="To:")
         r.pack()
         r_e = tk.Entry(top, textvariable = r_address_text)
         r_e.pack()
-        b = tk.Button(top, text='Email It', command =lambda: email_content(email_str, s_address_text.get(), r_address_text.get(), "Grocery Shopping List")) # call the email_content function in .py file
+        b = tk.Button(top, text='Email It', command =lambda: email_content(email_str, r_address_text.get(), "Grocery Shopping List")) # call the email_content function in .py file
         b.pack()
         
     def appear(self):
