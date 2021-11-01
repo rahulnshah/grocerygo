@@ -126,7 +126,7 @@ class ShoppingList(tk.Frame):
         r.pack()
         r_e = tk.Entry(top, textvariable = r_address_text)
         r_e.pack()
-        b = tk.Button(top, text='Email It', command =lambda: email_content(email_str, r_address_text.get(), "Grocery Shopping List")) # call the email_content function in .py file
+        b = tk.Button(top, text='Email It', command =lambda: email_content(email_str, r_address_text.get())) # call the email_content function in .py file
         b.pack()
         
     def appear(self):
