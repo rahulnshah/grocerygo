@@ -1,4 +1,4 @@
-# shoppingList
+# shoppingList  (portfolio project)
 ## What is it?
 A simple GUI application that not only allows one to add, update, and remove a shopping item from a shopping list, but also allows one to email it to its recipient.
 
