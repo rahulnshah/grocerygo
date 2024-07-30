@@ -1,62 +1,57 @@
+"use client"
 import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import   
- TextField from '@mui/material/TextField';
+import TextField from '@mui/material/TextField';
 import Checkbox from '@mui/material/Checkbox';
 import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';   
-
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';   
+import IconButton from '@mui/material/IconButton';
+import Navbar from '../ui/home/NavBar';
+// import Visibility from '@mui/icons-material/Visibility';
+// import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 import Link from '@mui/material/Link';
 import { styled } from '@mui/material/styles';
 
 const StyledBox = styled(Box)(({ theme }) => ({
   display: 'flex',
-  flexDirection: 'column',   
-
+  flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  minHeight: '100vh',
-  backgroundImage: `url('path/to/your/notebook-background.jpg')`,
-  backgroundRepeat: 'no-repeat',
-  backgroundSize: 'cover',
-  padding: theme.spacing(4),
-  borderRadius: 16,
-  boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+  boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)'
 }));
 
 function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');   
+  const [password, setPassword] = useState('');
 
   const [keepSignedIn, setKeepSignedIn] = useState(false);
 
-  const   
- handleSubmit = (event: { preventDefault: () => void; }) => {
-    event.preventDefault();
-    // Handle login logic here
-    console.log('Email:', email);
-    console.log('Password:', password);   
+  const
+    handleSubmit = (event: { preventDefault: () => void; }) => {
+      event.preventDefault();
+      // Handle login logic here
+      console.log('Email:', email);
+      console.log('Password:', password);
 
-    console.log('Keep me signed in:', keepSignedIn);
-  };
+      console.log('Keep me signed in:', keepSignedIn);
+    };
 
   return (
+    <>
+    <Navbar/>
     <StyledBox>
       <Typography variant="h4" component="h2" gutterBottom>
         Log in to GroceryGo
       </Typography>
-      {/* <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}> */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2}}>
         {/* Social login buttons */}
         <Button
           variant="contained"
           fullWidth
           color="primary"
-          startIcon={<FacebookIcon />}
+          // startIcon={<FacebookIcon />}
         >
           Continue with Facebook
         </Button>
@@ -64,7 +59,7 @@ function LoginPage() {
           variant="contained"
           fullWidth
           color="primary"
-          startIcon={<GoogleIcon />}
+          // startIcon={<GoogleIcon />}
         >
           Continue with Google
         </Button>
@@ -72,7 +67,7 @@ function LoginPage() {
           variant="contained"
           fullWidth
           color="primary"
-          startIcon={<AppleIcon />}
+          // startIcon={<AppleIcon />}
         >
           Continue with Apple
         </Button>
@@ -106,20 +101,20 @@ function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}   
 
-          InputProps={{
-            endAdornment: (
-              <IconButton   
+//           InputProps={{
+//             endAdornment: (
+//               <IconButton   
 
-                aria-label="toggle password visibility"
-                onClick={() => setShowPassword(!showPassword)}
-                onMouseDown={(event) => event.preventDefault()}
-              >
-                {showPassword ? <VisibilityOff   
- /> : <Visibility />}
-              </IconButton>   
+//                 aria-label="toggle password visibility"
+//                 onClick={() => setShowPassword(!showPassword)}
+//                 onMouseDown={(event) => event.preventDefault()}
+//               >
+//                 {showPassword ? <VisibilityOff   
+//  /> : <Visibility />}
+//               </IconButton>   
 
-            ),
-          }}
+//             ),
+//           }}
         />
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
           <Checkbox
@@ -140,6 +135,7 @@ function LoginPage() {
         <Link href="/sign-up">Don't have an account? Sign up</Link>
       </Box>
     </StyledBox>
+    </>
   );
 }
 

@@ -10,21 +10,11 @@ const NotebookLayout = ({ children }: { children: ReactNode }) => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Navbar />
-      <Box
-        sx={{
-          position: 'relative',
-          minHeight: '100vh',
-          backgroundImage: `url(${bg.src})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
         <Container>
           <Box pt={2}>
             {children}
           </Box>
         </Container>
-      </Box>
     </ThemeProvider>
   );
 };

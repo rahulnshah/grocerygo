@@ -26,27 +26,27 @@ export default function About() {
                                     Browse and select
                                 </Typography>
                                 <Typography variant="body2">
-                                    Easily find your favorite products and add them to your cart.
+                                    Easily find your favorite lists and add them to your cart.
                                 </Typography>
                             </CardContent>
                         </Card>
                         <Card sx={{ maxWidth: 300, margin: 2 }}>
                             <CardContent>
                                 <Typography variant="h5" component="h2" gutterBottom>
-                                    Schedule delivery
+                                    Collaborate with ease
                                 </Typography>
                                 <Typography variant="body2">
-                                    Choose a convenient delivery time that fits your schedule.
+                                Shared lists that multiple users can edit in real-time.  Assign items to specific users.
                                 </Typography>
                             </CardContent>
                         </Card>
                         <Card sx={{ maxWidth: 300, margin: 2 }}>
                             <CardContent>
                                 <Typography variant="h5" component="h2" gutterBottom>
-                                    Enjoy your groceries
+                                    Scheduled delievery
                                 </Typography>
                                 <Typography variant="body2">
-                                    Relax and enjoy your groceries delivered to your doorstep.
+                                    Get notified of commonly forgotten items based on your past shopping history.
                                 </Typography>
                             </CardContent>
                         </Card>
