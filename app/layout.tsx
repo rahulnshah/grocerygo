@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body  className="background-image">
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
             {children}

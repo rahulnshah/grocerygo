@@ -31,3 +31,9 @@ body {
     text-wrap: balance;
   }
 }
+
+.background-image {
+  background-image: url('../public/notebook_paper.png'); /* Replace with your image path */
+  background-repeat: no-repeat;
+  background-size: cover;
+}
