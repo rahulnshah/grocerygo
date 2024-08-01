@@ -115,7 +115,7 @@ function LoginPage() {
           >
             Log in
           </Button>
-          <Link href="/sign-up" sx={{ color: 'black' }}>Don't have an account? Sign up</Link>
+          <Link href="/sign-up" sx={{ color: 'black' }}>Don&apos;t have an account? Sign up</Link>
         </Box>
       </StyledBox>
     </>
