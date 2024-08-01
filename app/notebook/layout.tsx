@@ -2,8 +2,6 @@ import { Box, Container, CssBaseline, ThemeProvider } from '@mui/material';
 import { ReactNode } from 'react';
 import theme from '../../theme';
 import Navbar from '../ui/notebook/NavBar';
-import bg from '../../public/notebook_paper.png';
-
 
 const NotebookLayout = ({ children }: { children: ReactNode }) => {
   return (

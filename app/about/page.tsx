@@ -10,8 +10,8 @@ export default function About() {
                     <Typography variant="h3" color="black" component="h1" align="center" gutterBottom>
                         About GroceryGo
                     </Typography>
-                    <Typography variant="h5" align="center" color="black">
-                        At GroceryGo, our mission is to revolutionize the way you shop for groceries. We believe that your time is precious, and you shouldn't have to spend hours navigating crowded aisles. That's why we've created a convenient and efficient platform that brings your favorite products right to your doorstep.
+                    <Typography variant="h5" align="left" color="black">
+                        Welcome to GroceryGo, your new favorite companion for seamless shopping! Our app transforms the mundane task of grocery shopping into an effortless and delightful experience. With smart lists, instant sharing, and personalized recommendations, GroceryGo ensures you never miss an item or a deal. Whether you’re planning a cozy family dinner or stocking up for a big party, GroceryGo has got you covered with style and ease. Happy shopping!
                     </Typography>
                     {/* Add sections for how it works, team, values, etc. */}
                     <br />

@@ -26,6 +26,7 @@ function SignUpPage() {
                     backgroundColor: "white",
                     position: 'relative',
                     p: 4, // Add 
+                    height: '100vh', // Full viewport height
                 }}
             >
                 <Typography component="h1" variant="h5">
