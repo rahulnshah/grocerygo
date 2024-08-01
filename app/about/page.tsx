@@ -11,7 +11,7 @@ export default function About() {
                         About GroceryGo
                     </Typography>
                     <Typography variant="h5" align="left" color="black">
-                        Welcome to GroceryGo, your new favorite companion for seamless shopping! Our app transforms the mundane task of grocery shopping into an effortless and delightful experience. With smart lists, instant sharing, and personalized recommendations, GroceryGo ensures you never miss an item or a deal. Whether you’re planning a cozy family dinner or stocking up for a big party, GroceryGo has got you covered with style and ease. Happy shopping!
+                        Welcome to GroceryGo, your new favorite companion for seamless shopping! Our app transforms the mundane task of grocery shopping into an effortless and delightful experience. With smart lists, instant sharing, and personalized recommendations, GroceryGo ensures you never miss an item or a deal. Whether you&apos;re planning a cozy family dinner or stocking up for a big party, GroceryGo has got you covered with style and ease. Happy shopping!
                     </Typography>
                     {/* Add sections for how it works, team, values, etc. */}
                     <br />
