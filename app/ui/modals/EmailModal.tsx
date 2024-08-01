@@ -50,7 +50,7 @@ const EmailModal = ({ isOpen } : {isOpen : boolean }) => {
         }}
       >
         <Typography variant="h6" component="h2">
-          Email "Grocery Shopping List"
+          Email &quot;Grocery Shopping List&quot;
         </Typography>
         <Typography variant="body1" color="textSecondary">
           Join thousands getting emails in their inbox.
