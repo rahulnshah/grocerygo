@@ -15,6 +15,8 @@ export type Item = {
     list_id: number;
     name: string;
     is_checked: boolean;
+    created_at: string;
+    updated_at: string;
 };
 
 // Type for a list
@@ -22,10 +24,21 @@ export type List = {
     id: number;
     name: string;
     description: string;
+    created_at: string;
+    updated_at: string;
 };
 
 // Type for the favorites relationship
 export type Favorite = {
     id: number;
     list_id: number;
+    created_at: string;
+};
+
+export type CheckedItemsCount = {
+    checked_items_count: number;
+};
+  
+export type ItemsCount = {
+    items_count: number;
 };
