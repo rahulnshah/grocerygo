@@ -1,29 +1,25 @@
 // components/ListGrid.tsx
-// "use client"
-// import React, { useEffect, useState } from 'react';
+"use client"
+import React, { useEffect, useState } from 'react';
 import { Box, CircularProgress } from '@mui/material';
 import ListCard from './ListCard';
-import { fetchList, fetchCheckedItemsById } from '../../lib/data'; // Adjust the import path as needed
 import { List, CheckedItemsCount } from '../../lib/definitions';
 
-const ListGrid = async () => {
-  // const [lists, setLists] = useState<List[]>([]);
-  // const [loading, setLoading] = useState(true);
+const ListGrid = () => {
+  const [lists, setLists] = useState<List[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // useEffect(() => {
-  //   const getLists = async () => {
-  //     try {
-  //       const fetchedLists = await fetchList();
-  //       setLists(fetchedLists);
-  //     } catch (error) {
-  //       console.error('Error fetching lists:', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   getLists();
-  // }, []);
-  const lists = await fetchList();
+  useEffect(() => {
+    const getLists = () => {
+      fetch('/api/lists')
+      .then(res => res.json())
+      .then(fetchedLists => setLists(fetchedLists))
+      .catch(error => console.error('Error fetching items:', error))
+      .finally(() => setLoading(false));
+    };
+    getLists();
+  }, []);
+  // const lists = await fetchList();
 
   return (
     <Box
@@ -34,18 +30,18 @@ const ListGrid = async () => {
         width: '50%',
       }}
     >
-      {
-      /* {loading ? (
+    {loading ? (
         <CircularProgress />
-      ) : */
-        lists?.map((list) => (
+      ) : (
+        lists.map((list) => (
           <ListCard
             key={list.id}
             title={list.name}
+            description={list.description}
             list_id={list.id}
           />
-        ) || <CircularProgress />)
-      }
+        ))
+      )}
     </Box>
   );
 };

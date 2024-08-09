@@ -4,7 +4,7 @@ import { sql } from '@vercel/postgres';
 
 export async function GET() {
   try {
-    const { rows } = await sql`SELECT * FROM lists LIMIT 10`;
+    const { rows } = await sql`SELECT * FROM lists LIMIT 6`;
     return NextResponse.json(rows);
   } catch (error) {
     console.error('Error fetching lists:', error);

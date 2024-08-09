@@ -11,8 +11,8 @@ export type User = {
 
 // Type for an item
 export type Item = {
-    id: number;
-    list_id: number;
+    id: string;
+    list_id: string;
     name: string;
     is_checked: boolean;
     created_at: string;
@@ -21,7 +21,7 @@ export type Item = {
 
 // Type for a list
 export type List = {
-    id: number;
+    id: string;
     name: string;
     description: string;
     created_at: string;
