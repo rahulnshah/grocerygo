@@ -29,16 +29,10 @@ export type List = {
 };
 
 // Type for the favorites relationship
-export type Favorite = {
-    id: number;
-    list_id: number;
+export type FavoriteList = {
+    id: string;
+    list_id: string;
+    name: string;
+    description: string;
     created_at: string;
-};
-
-export type CheckedItemsCount = {
-    checked_items_count: number;
-};
-  
-export type ItemsCount = {
-    items_count: number;
 };
