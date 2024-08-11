@@ -36,3 +36,11 @@ export type FavoriteList = {
     description: string;
     created_at: string;
 };
+
+// export type ListField = {
+//     id: string;
+//     name: string;
+//     description: string;
+//     created_at: string;
+//     updated_at: string;
+// };

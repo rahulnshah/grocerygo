@@ -1,7 +1,7 @@
 // app/notebook/page.tsx
 import { Box, Typography } from '@mui/material';
 import ListGrid from '../ui/other/ListGrid';
-import AddNewList from '../ui/other/AddNewList';
+import AddNewListForm from '../ui/other/AddNewListForm';
 
 const NotebookPage = () => {
   return (<Box sx={{ display: 'flex', justifyContent: 'space-between', padding: 4 }}>
@@ -10,7 +10,7 @@ const NotebookPage = () => {
         <ListGrid />
       </Box>
       <Box sx={{ width: '35%' }}>
-        <AddNewList />
+        <AddNewListForm />
       </Box>
     </Box>
   );

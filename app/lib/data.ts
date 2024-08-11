@@ -13,7 +13,7 @@ export async function fetchList() {
   noStore();
 
   try {
-    const data = await sql<List>`SELECT * FROM lists LIMIT 6`;
+    const data = await sql<List>`SELECT * FROM lists LIMIT 20`;
     return data.rows;
   } catch (error) {
     console.error('Database Error:', error);
