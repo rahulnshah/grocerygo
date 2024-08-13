@@ -5,8 +5,11 @@ import Link from 'next/link';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import MailIcon from '@mui/icons-material/Mail';
 import ShareIcon from '@mui/icons-material/Share';
+import EditIcon from '@mui/icons-material/Edit';
 import { fetchListData } from '@/app/lib/data';
-
+import { DeleteList } from '../notebook/DeleteList';
+import { UpdateList } from '../notebook/UpdateList';
+import { redirect } from 'next/navigation';
 const ListCard = async ({ title, description, list_id }: { title: string, description: string, list_id: string }) => {
   const { numItems, numCheckedItems } = await fetchListData(list_id);
   // const [numItems, setNumItems] = useState("0");
@@ -39,11 +42,9 @@ const ListCard = async ({ title, description, list_id }: { title: string, descri
   //   };
   //   getListInfo();
   // }, []);
-  
+
   return (
-    <Link
-      href={`/notebook/items/${list_id}`}
-      >
+
     <Box sx={{
       display: 'flex',
       flexDirection: 'column',
@@ -54,13 +55,15 @@ const ListCard = async ({ title, description, list_id }: { title: string, descri
       backgroundColor: 'white',
       mt: 2
     }}>
-      <Typography variant="h6">{title}</Typography>
-      <Typography variant="h6">{description}</Typography>
-      <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-        <Avatar src="path/to/avatar1.jpg" sx={{ width: 24, height: 24 }} />
-        <Avatar src="path/to/avatar2.jpg" sx={{ width: 24, height: 24, ml: -1 }} />
-        <Badge badgeContent={2} color="primary" sx={{ ml: 1 }} />
-      </Box>
+      <Link href={`/notebook/items/${list_id}`}>
+        <Typography variant="h6">{title}</Typography>
+        <Typography variant="h6">{description}</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+          <Avatar src="path/to/avatar1.jpg" sx={{ width: 24, height: 24 }} />
+          <Avatar src="path/to/avatar2.jpg" sx={{ width: 24, height: 24, ml: -1 }} />
+          <Badge badgeContent={2} color="primary" sx={{ ml: 1 }} />
+        </Box>
+      </Link>
       <Typography variant="body2" color="textSecondary">{numCheckedItems} out of {numItems} completed</Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
         <IconButton>
@@ -72,9 +75,10 @@ const ListCard = async ({ title, description, list_id }: { title: string, descri
         <IconButton>
           <ShareIcon sx={{ color: '#ED9121' }} />
         </IconButton>
+        <UpdateList id={list_id} />
+        <DeleteList id={list_id} />
       </Box>
     </Box>
-    </Link>
   );
 };
 
