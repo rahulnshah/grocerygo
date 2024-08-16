@@ -3,6 +3,7 @@ import {
   Item,
   FavoriteList,
   List,
+  ListForm
 } from './definitions';
 
 import { unstable_noStore as noStore } from 'next/cache';
@@ -81,7 +82,19 @@ export async function fetchListData(id: string) {
   }
   catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to list card data.');
+    throw new Error('Failed to fetch list card data.');
   }
 
+}
+
+export async function fetchListById(id: string) {
+  try{
+    const data = await sql<ListForm>`SELECT lists.id, lists.name, lists.description FROM lists WHERE id = ${id}`;
+    return data.rows[0];
+  }
+  catch(error)
+  {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch list.');
+  }
 }
