@@ -42,3 +42,10 @@ export type ListForm = {
     name: string;
     description: string;
 };
+
+export type ItemForm = {
+    id: string;
+    list_id: string;
+    name: string;
+    is_checked: boolean;
+};

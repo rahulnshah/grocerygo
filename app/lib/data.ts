@@ -3,7 +3,8 @@ import {
   Item,
   FavoriteList,
   List,
-  ListForm
+  ListForm,
+  ItemForm
 } from './definitions';
 
 import { unstable_noStore as noStore } from 'next/cache';
@@ -26,7 +27,7 @@ export async function fetchItems(list_id: string) {
   noStore();
 
   try {
-    const data = await sql<Item>`SELECT * FROM items WHERE list_id = ${list_id} LIMIT 6`;
+    const data = await sql<ItemForm>`SELECT items.id, items.list_id, items.name, items.is_checked FROM items WHERE list_id = ${list_id} LIMIT 20`;
     return data.rows;
   } catch (error) {
     console.error('Database Error:', error);
