@@ -13,7 +13,7 @@ const EditItemForm = ({ item }: { item: ItemForm }) => {
   return (
     <form action={updateItemWithId}>
       <TextField  sx={{ mb: 2 }} name="name" label="Title" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
-      {item.is_checked ? (<Checkbox sx={{ mr: 1 }} name='is_checked' defaultChecked />) : (<Checkbox name='is_checked' />)}
+      {item.is_checked ? (<Checkbox sx={{ mr: 1 }} name='is_checked' defaultChecked />) : (<Checkbox sx={{ mr: 1 }} name='is_checked' />)}
       <IconButton type="submit">
         <EditIcon sx={{ color: '#ED9121' }} />
       </IconButton>
