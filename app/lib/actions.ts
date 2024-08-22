@@ -101,3 +101,4 @@ export async function deleteItem(id: string, list_id: string) {
   await sql`DELETE FROM items WHERE id = ${id}`;
   revalidatePath(`/notebook/items/${list_id}`);
 }
+

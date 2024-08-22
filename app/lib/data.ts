@@ -89,13 +89,30 @@ export async function fetchListData(id: string) {
 }
 
 export async function fetchListById(id: string) {
-  try{
+  try {
     const data = await sql<ListForm>`SELECT lists.id, lists.name, lists.description FROM lists WHERE id = ${id}`;
     return data.rows[0];
   }
-  catch(error)
-  {
+  catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch list.');
+  }
+}
+
+export async function isFavorited(list_id: string) {
+  try {
+    const result = await sql`
+    SELECT COUNT(*) > 0 AS is_favorited
+    FROM favorites
+    WHERE list_id = ${list_id};
+  `;
+
+    const isFavorited = result.rows[0]?.is_favorited || false;
+
+    return isFavorited;
+  }
+  catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to check if list is favorited.');
   }
 }
