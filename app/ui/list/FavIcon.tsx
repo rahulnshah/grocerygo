@@ -9,27 +9,27 @@ export default function FavIcon({ isFavorited, list_id }: { isFavorited: boolean
   const favoriteListWithId = favoriteList.bind(null, list_id);
   const unFavoriteListWithId = unFavoriteList.bind(null, list_id);
 
-  // const handleFavSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   await unFavoriteListWithId();
-  //   setIsFav(!isFav); // Update local state
-  // };
+  const handleFavSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await favoriteListWithId();
+    setIsFav(!isFav); // Update local state
+  };
 
-  // const handleUnFavSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   await favoriteListWithId();
-  //   setIsFav(!isFav); // Update local state
-  // };
+  const handleUnFavSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await unFavoriteListWithId();
+    setIsFav(!isFav); // Update local state
+  };
 
   return (
     <>
       {isFav ? (
-        <form action={unFavoriteListWithId}>
+        <form onSubmit={handleUnFavSubmit}>
           <IconButton type="submit">
             <FavoriteIcon sx={{ color: '#ED9121' }} />
           </IconButton>
         </form>) :
-        (<form action={favoriteListWithId}>
+        (<form onSubmit={handleFavSubmit}>
           <IconButton type="submit">
             <FavoriteBorderOutlined sx={{ color: '#ED9121' }} />
           </IconButton>
