@@ -1,37 +1,35 @@
+'use client'
 import React from 'react';
-import { Box, Typography, IconButton } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { Box, Typography } from '@mui/material';
+import { DeleteItem } from '../item/DeleteItem';
+// import { CheckItem } from '../edititem/CheckItem';
+import TextField from '@mui/material/TextField';
+import EditItemForm from '../item/EditItemForm';
+import { ItemForm } from '@/app/lib/definitions';
 
-const ToBuyItem = ({ title }: { title: string}) => {
+const ToBuyItem = ({ item }: { item: ItemForm }) => {
+
   return (
-    <Box sx={{
-      display: 'flex',
-      alignItems: 'center',
-      padding: 2,
-      borderRadius: 1,
-      boxShadow: 1,
-      backgroundColor: 'white',
-      mt: 2
-    }}>
-      <Box sx={{ flex: 1 }}>
-        <Typography variant="body1" sx={{ color: '#ED9121' }}>{title}</Typography>
-        {/* <Typography variant="body2">{subtitle}</Typography> */}
+    <>
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
+        padding: 2,
+        borderRadius: 1,
+        boxShadow: 1,
+        backgroundColor: item.is_checked ? 'orange' : 'white',
+        mt: 2
+      }}>
+        <Box sx={{ flex: 1 }}>
+          <EditItemForm item={item} />
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography variant="body2" sx={{ mr: 1 }}>You</Typography>
+          <DeleteItem id={item.id} list_id={item.list_id} />
+          {/* <CheckItem id={item_id} list_id={list_id}/> */}
+        </Box>
       </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <Typography variant="body2" sx={{ mr: 1 }}>You</Typography>
-        <IconButton>
-          <EditIcon />
-        </IconButton>
-        <IconButton>
-          <DeleteIcon />
-        </IconButton>
-        <IconButton>
-          <CheckCircleIcon />
-        </IconButton>
-      </Box>
-    </Box>
+    </>
   );
 };
 
