@@ -9,7 +9,7 @@ const NotebookPage = () => {
         <Typography variant="h1" align="center">Hello Rahul!</Typography>
         <ListGrid />
       </Box>
-      <Box sx={{ width: '35%' }}>
+      <Box sx={{ width: '25%' }}>
         <AddNewListForm />
       </Box>
     </Box>

@@ -25,7 +25,7 @@ const ListGrid = async () => {
     <Box
       sx={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateColumns: 'repeat(3, 1fr)',
         gap: 2,
         width: '50%',
       }}

@@ -51,6 +51,17 @@ export async function createItem(list_id: string, formData: FormData)
   // redirect(`/notebook/items/${list_id}`);
 }
 
+export async function favoriteList(list_id:string) {
+  await sql`INSERT INTO favorites (list_id)
+      VALUES (${list_id})`
+  revalidatePath('/notebook');
+}
+
+export async function unFavoriteList(list_id:string) {
+  await sql`DELETE FROM favorites WHERE list_id = ${list_id}`
+  revalidatePath('/notebook');
+}
+
 // Use Zod to update the expected types
 const UpdateList = ListFormSchema.omit({ id: true, created_at: true, updated_at: true });
 const UpdateItem = ItemFormSchema.omit({ id: true, list_id: true, created_at: true, updated_at: true });

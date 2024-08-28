@@ -1,17 +1,17 @@
 import React from 'react';
-import { useEffect, useState } from 'react';
 import { Box, Typography, IconButton, Avatar, Badge } from '@mui/material';
+import FavIcon from '../list/FavIcon';
 import Link from 'next/link';
-import FavoriteIcon from '@mui/icons-material/Favorite';
 import MailIcon from '@mui/icons-material/Mail';
 import ShareIcon from '@mui/icons-material/Share';
 import EditIcon from '@mui/icons-material/Edit';
-import { fetchListData } from '@/app/lib/data';
+import { fetchListData, isFavorited } from '@/app/lib/data';
 import { DeleteList } from '../notebook/DeleteList';
 import { UpdateList } from '../notebook/UpdateList';
 import { redirect } from 'next/navigation';
 const ListCard = async ({ title, description, list_id }: { title: string, description: string, list_id: string }) => {
   const { numItems, numCheckedItems } = await fetchListData(list_id);
+  const is_favorited = await isFavorited(list_id);
   // const [numItems, setNumItems] = useState("0");
   // const [numCheckedItems, setNumCheckedItems] = useState("0");
   // const router = useRouter();
@@ -66,9 +66,7 @@ const ListCard = async ({ title, description, list_id }: { title: string, descri
       </Link>
       <Typography variant="body2" color="textSecondary">{numCheckedItems} out of {numItems} completed</Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-        <IconButton>
-          <FavoriteIcon sx={{ color: '#ED9121' }} />
-        </IconButton>
+        <FavIcon isFavorited={is_favorited} list_id={list_id}/>
         <IconButton>
           <MailIcon sx={{ color: '#ED9121' }} />
         </IconButton>

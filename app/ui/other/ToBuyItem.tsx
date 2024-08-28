@@ -1,10 +1,10 @@
 'use client'
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import { DeleteItem } from '../edititem/DeleteItem';
+import { DeleteItem } from '../item/DeleteItem';
 // import { CheckItem } from '../edititem/CheckItem';
 import TextField from '@mui/material/TextField';
-import EditItemForm from '../edititem/EditItemForm';
+import EditItemForm from '../item/EditItemForm';
 import { ItemForm } from '@/app/lib/definitions';
 
 const ToBuyItem = ({ item }: { item: ItemForm }) => {

@@ -1,5 +1,5 @@
 import { fetchListById } from '@/app/lib/data';
-import EditListForm from '@/app/ui/editist/EditListForm';
+import EditListForm from '@/app/ui/list/EditListForm';
 
 // interface EditItemProps {
 //   item: {

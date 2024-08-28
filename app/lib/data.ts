@@ -58,6 +58,7 @@ export async function fetchFavoriteLists() {
 }
 
 export async function fetchListData(id: string) {
+  noStore();
   try {
     const checkedItemsCountPromise = await sql`
       SELECT 
@@ -89,6 +90,7 @@ export async function fetchListData(id: string) {
 }
 
 export async function fetchListById(id: string) {
+  noStore();
   try {
     const data = await sql<ListForm>`SELECT lists.id, lists.name, lists.description FROM lists WHERE id = ${id}`;
     return data.rows[0];
@@ -100,6 +102,7 @@ export async function fetchListById(id: string) {
 }
 
 export async function isFavorited(list_id: string) {
+  noStore();
   try {
     const result = await sql`
     SELECT COUNT(*) > 0 AS is_favorited
