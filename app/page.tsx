@@ -1,4 +1,5 @@
 // import Image from "next/image";
+// able to close PR #4
 import { Box, Container, Typography, Button, Link } from '@mui/material';
 import Navbar from './ui/home/NavBar';
 export default function Home() {
