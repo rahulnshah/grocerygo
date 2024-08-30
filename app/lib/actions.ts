@@ -29,11 +29,15 @@ export async function createList(formData: FormData) {
     name: formData.get('name'),
     description: formData.get('description')
   });
-
-  await sql`
+  try {
+    await sql`
         INSERT INTO lists (name, description)
         VALUES (${name}, ${description})
       `;
+  }
+  catch (error) {
+    return { message: 'Database Error: Failed to Create List.', };
+  }
 
   revalidatePath('/notebook');
   // redirect('/notebook');
@@ -44,21 +48,36 @@ export async function createItem(list_id: string, formData: FormData) {
     name: formData.get('name'),
     is_checked: formData.get('is_checked') === 'on' ? true : false
   });
-  await sql`INSERT INTO items (name, list_id, is_checked)
-      VALUES (${name}, ${list_id}, ${is_checked})`
+  try {
+    await sql`INSERT INTO items (name, list_id, is_checked)
+      VALUES (${name}, ${list_id}, ${is_checked})`;
+  }
+  catch (error) {
+    return { message: 'Database Error: Failed to Create Item.', };
+  }
   revalidatePath(`/notebook/items/${list_id}`);
   // redirect(`/notebook/items/${list_id}`);
 }
 
 export async function favoriteList(list_id: string) {
-  await sql`INSERT INTO favorites (list_id)
-      VALUES (${list_id})`
+  try {
+    await sql`INSERT INTO favorites (list_id)
+      VALUES (${list_id})`;
+  }
+  catch (error) {
+    return { message: 'Database Error: Failed to favorite list.', };
+  }
   revalidatePath('/notebook');
   revalidatePath('/notebook/saved');
 }
 
 export async function unFavoriteList(list_id: string) {
-  await sql`DELETE FROM favorites WHERE list_id = ${list_id}`
+  try {
+    await sql`DELETE FROM favorites WHERE list_id = ${list_id}`;
+  }
+  catch (error) {
+    return { message: 'Database Error: Failed to unfavorite list.', };
+  }
   revalidatePath('/notebook');
   revalidatePath('/notebook/saved');
 }
@@ -73,12 +92,16 @@ export async function updateList(id: string, formData: FormData) {
     description: formData.get('description')
   });
 
-  await sql`
+  try {
+    await sql`
     UPDATE lists
       SET name = ${name}, description = ${description}
       WHERE id = ${id}
   `;
-
+  }
+  catch (error) {
+    return { message: 'Database Error: Failed to Update List.', };
+  }
   revalidatePath('/notebook');
   redirect('/notebook');
 }
@@ -88,29 +111,51 @@ export async function updateItem(id: string, list_id: string, formData: FormData
     name: formData.get('name'),
     is_checked: formData.get('is_checked') === 'on' ? true : false
   });
-  await sql`UPDATE items
+  try {
+    await sql`UPDATE items
       SET name = ${name}, is_checked = ${is_checked}
-      WHERE id = ${id}`
+      WHERE id = ${id}`;
+  }
+  catch (error) {
+    return { message: 'Database Error: Failed to Update Item.', };
+  }
   revalidatePath(`/notebook/items/${list_id}`);
   // redirect(`/notebook/items/${list_id}`);
 }
 
 export async function checkItem(id: string, list_id: string) {
-  await sql`UPDATE items
+  try {
+    await sql`UPDATE items
   SET is_checked = NOT is_checked
-  WHERE id = ${id}`
+  WHERE id = ${id}`;
+  }
+  catch (error) {
+    return { message: 'Database Error: Failed to check item.', };
+  }
   revalidatePath(`/notebook/items/${list_id}`);
   // redirect(`/notebook/items/${list_id}`);
 }
 
 export async function deleteList(id: string) {
-  await sql`DELETE FROM lists WHERE id = ${id}`;
-  revalidatePath('/notebook');
-  revalidatePath('/notebook/saved');
+  try {
+    await sql`DELETE FROM lists WHERE id = ${id}`;
+    revalidatePath('/notebook');
+    revalidatePath('/notebook/saved');
+    return { message: 'Deleted List.' };
+  }
+  catch (error) {
+    return { message: 'Database Error: Failed to Delete List.', };
+  }
 }
 
 export async function deleteItem(id: string, list_id: string) {
-  await sql`DELETE FROM items WHERE id = ${id}`;
-  revalidatePath(`/notebook/items/${list_id}`);
+  try {
+    await sql`DELETE FROM items WHERE id = ${id}`;
+    revalidatePath(`/notebook/items/${list_id}`);
+    return { message: 'Deleted Item.' };
+  }
+  catch (error) {
+    return { message: 'Database Error: Failed to Delete Item.' };
+  }
 }
 
