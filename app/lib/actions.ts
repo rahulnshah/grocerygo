@@ -71,6 +71,7 @@ export async function createList(prevState: State, formData: FormData) {
         INSERT INTO lists (name, description)
         VALUES (${name}, ${description})
       `;
+    return { message: "Form submitted" }; // or some relevant message
   }
   catch (error) {
     return { message: 'Database Error: Failed to Create List.', };
@@ -99,6 +100,7 @@ export async function createItem(list_id: string, prevState: ItemState, formData
   try {
     await sql`INSERT INTO items (name, list_id, is_checked)
       VALUES (${name}, ${list_id}, ${is_checked})`;
+    return { message: "Form submitted" }; // or some relevant message
   }
   catch (error) {
     return { message: 'Database Error: Failed to Create Item.', };
@@ -157,6 +159,7 @@ export async function updateList(id: string, prevState: State, formData: FormDat
       SET name = ${name}, description = ${description}
       WHERE id = ${id}
   `;
+    return { message: "Form submitted" }; // or some relevant message
   }
   catch (error) {
     return { message: 'Database Error: Failed to Update List.', };
@@ -186,6 +189,7 @@ export async function updateItem(id: string, list_id: string, prevState: ItemSta
     await sql`UPDATE items
       SET name = ${name}, is_checked = ${is_checked}
       WHERE id = ${id}`;
+    return { message: "Form submitted" }; // or some relevant message
   }
   catch (error) {
     return { message: 'Database Error: Failed to Update Item.', };

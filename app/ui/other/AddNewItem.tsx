@@ -44,7 +44,7 @@ const AddNewItem = ({list_id}:{list_id: string}) => {
           helperText={state.errors?.name?.[0] || ''}
         />
         <Checkbox name='is_checked'/>
-        {!!state?.errors?.is_checked?.[0] &&  <FormHelperText>{state?.errors?.is_checked?.[0]}</FormHelperText>}
+        {!!state.errors?.is_checked?.[0] &&  <FormHelperText>{state.errors?.is_checked?.[0]}</FormHelperText>}
         <Button
           variant="contained"
           sx={{ mt: 2, backgroundColor: '#ED9121', color: 'white' }}
