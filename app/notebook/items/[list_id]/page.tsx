@@ -3,8 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { Item } from '../../../lib/definitions';
 import { Box, CircularProgress } from '@mui/material';
 import ToBuyItem from '../../../ui/other/ToBuyItem';
-import { fetchItems } from '@/app/lib/data';
+import { fetchItems, fetchListById } from '@/app/lib/data';
 import AddNewItem from '@/app/ui/other/AddNewItem';
+import { notFound } from 'next/navigation';
 
 export default async function ItemsPage({ params }: { params: { list_id: string } }) {
 
@@ -26,7 +27,13 @@ export default async function ItemsPage({ params }: { params: { list_id: string 
   //   };
   //   getItems();
   // }, []);
+  const list = await fetchListById(params.list_id);
+  if(!list)
+  {
+    notFound();
+  }
   const items = await fetchItems(params.list_id);
+
   return (
     <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: 4 }}>
       <Box sx={{ width: '60%' }}>

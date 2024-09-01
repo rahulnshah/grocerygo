@@ -1,14 +1,15 @@
 'use client'
 import React, { useState } from 'react';
-import Box from '@mui/material/Box';
-import { IconButton, Checkbox } from '@mui/material';
+import { ItemState } from '@/app/lib/actions';
+import { IconButton, Checkbox, FormHelperText } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import EditIcon from '@mui/icons-material/Edit';
 import { ItemForm } from '@/app/lib/definitions';
 import { updateItem } from '@/app/lib/actions';
+import { useFormState } from 'react-dom';
+// import { useActionState } from 'react';
 
 const EditItemForm = ({ item }: { item: ItemForm }) => {
-  const updateItemWithId = updateItem.bind(null, item.id, item.list_id);
   const [name, setName] = useState(item.name);
   const [isChecked, setIsChecked] = useState(item.is_checked);
 
@@ -19,16 +20,27 @@ const EditItemForm = ({ item }: { item: ItemForm }) => {
   //   await updateItemWithId(formData);
   //   setIsChecked(formData.get("is_checked") === 'on'); // Update local state
   // };
-
+  const initialState: ItemState = { errors: {}, message: null };
+  const updateItemWithId = updateItem.bind(null, item.id, item.list_id);
+  const [state, formAction] = useFormState(updateItemWithId, initialState);
   return (
-    <form action={updateItemWithId}>
-      <TextField  sx={{ mb: 2 }} name="name" label="Title" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
+    <form action={formAction}>
+      <TextField 
+        sx={{ mb: 2 }}
+        name="name"
+        label="Title"
+        fullWidth value={name}
+        onChange={(e) => setName(e.target.value)}
+        error={!!state.errors?.name}
+        helperText={state.errors?.name?.[0] || ''}
+      />
       <Checkbox
         sx={{ mr: 1 }}
         name="is_checked"
         checked={isChecked}
         onChange={(e) => setIsChecked(e.target.checked)}
       />
+      {!!state.errors?.is_checked?.[0] && <FormHelperText>{state.errors?.is_checked?.[0]}</FormHelperText>}
       <IconButton type="submit">
         <EditIcon sx={{ color: '#ED9121' }} />
       </IconButton>
