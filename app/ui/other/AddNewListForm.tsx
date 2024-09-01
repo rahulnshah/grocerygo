@@ -1,12 +1,17 @@
+'use client'
 import React from 'react';
 import { Box, TextField, Button, Typography, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-// import { ListField } from '@/app/lib/definitions';
+import { useActionState } from 'react';
+import { useFormState } from 'react-dom';
 import { createList } from '@/app/lib/actions';
+import { State } from '@/app/lib/actions';
 
 const AddNewListForm = () => {
+  const initialState: State = { message: null, errors: {} };
+  const [state, action] = useFormState(createList, initialState);
   return (
-    <form action={createList}>
+    <form action={action}>
       <Box sx={{
         display: 'flex',
         flexDirection: 'column',
@@ -27,6 +32,8 @@ const AddNewListForm = () => {
           variant="outlined"
           fullWidth
           sx={{ mt: 2 }}
+          error={!!state.errors?.name}
+          helperText={state.errors?.name?.[0] || ''}
         />
         <TextField
           label="Description"
@@ -36,6 +43,8 @@ const AddNewListForm = () => {
           rows={4}
           fullWidth
           sx={{ mt: 2 }}
+          error={!!state.errors?.description}
+          helperText={state.errors?.description?.[0] || ''}
         />
         <Button
           variant="contained"
