@@ -1,4 +1,5 @@
 'use client';
+import { signOut } from '@/auth';
 import { AppBar, Toolbar, Box, Button } from '@mui/material';
 import Link from 'next/link'; // Import Link from next/link
 import { usePathname } from 'next/navigation'; // Import usePathname
@@ -24,7 +25,12 @@ const Navbar = () => {
             <Button color={isActive('/notebook/shared') ? 'secondary' : 'inherit'}>Shared</Button>
           </Link>
         </Box>
-        <Button color="inherit">Log out</Button>
+        <form action={async () => {
+          'use server';
+          await signOut();
+        }}>
+          <Button color="inherit">Log out</Button>
+        </form>
       </Toolbar>
     </AppBar>
   );

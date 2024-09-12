@@ -2,13 +2,6 @@
 // It describes the shape of the data, and what data type each property should accept.
 // For simplicity of teaching, we're manually defining these types.
 // However, these types are generated automatically if you're using an ORM such as Prisma.
-export type User = {
-    id: string;
-    name: string;
-    email: string;
-    password: string;
-};
-
 // Type for an item
 export type Item = {
     id: string;
@@ -23,6 +16,7 @@ export type Item = {
 export type List = {
     id: string;
     name: string;
+    user_id: string;
     description: string;
     created_at: string;
     updated_at: string;
@@ -32,8 +26,6 @@ export type List = {
 export type FavoriteList = {
     id: string;
     list_id: string;
-    name: string;
-    description: string;
     created_at: string;
 };
 
@@ -49,3 +41,11 @@ export type ItemForm = {
     name: string;
     is_checked: boolean;
 };
+
+export type User = {
+    id: string;
+    name: string;
+    email: string;
+    password: string;
+  };
+  

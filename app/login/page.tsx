@@ -9,6 +9,10 @@ import IconButton from '@mui/material/IconButton';
 import Navbar from '../ui/home/NavBar';
 import Link from '@mui/material/Link';
 import { styled } from '@mui/material/styles';
+import SignInWithGithub from '../ui/login/SignInWithGithub';
+import { authenticate } from '@/app/lib/actions';
+import { useFormState } from 'react-dom';
+import {useFormStatus} from "react-dom";
 
 const StyledBox = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -20,17 +24,16 @@ const StyledBox = styled(Box)(({ theme }) => ({
 
 function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [keepSignedIn, setKeepSignedIn] = useState(false);
-
-  const handleSubmit = (event: { preventDefault: () => void; }) => {
-    event.preventDefault();
-    // Handle login logic here
-    console.log('Email:', email);
-    console.log('Password:', password);
-    console.log('Keep me signed in:', keepSignedIn);
-  };
+  const initialState: any = { message: null, errors: {} };
+  const [state, action] = useFormState(authenticate, initialState);
+  const data = useFormStatus();
+  // const handleSubmit = (event: { preventDefault: () => void; }) => {
+  //   event.preventDefault();
+  //   // Handle login logic here
+  //   console.log('Email:', email);
+  //   console.log('Password:', password);
+  //   console.log('Keep me signed in:', keepSignedIn);
+  // };
 
   return (
     <>
@@ -41,82 +44,57 @@ function LoginPage() {
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {/* Social login buttons */}
-          <Button
-            variant="contained"
-            fullWidth
-            color="primary"
-            sx={{ color: 'black' }}
-            // startIcon={<FacebookIcon />}
-          >
-            Continue with Facebook
-          </Button>
-          <Button
-            variant="contained"
-            fullWidth
-            color="primary"
-            sx={{ color: 'black' }}
-            // startIcon={<GoogleIcon />}
-          >
-            Continue with Google
-          </Button>
-          <Button
-            variant="contained"
-            fullWidth
-            color="primary"
-            sx={{ color: 'black' }}
-            // startIcon={<AppleIcon />}
-          >
-            Continue with Apple
-          </Button>
+          <SignInWithGithub />
         </Box>
         <Typography variant="body2" align="center" sx={{ mt: 2, color: 'black' }}>
           OR
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email address"
-            name="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            sx={{ color: 'black' }}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Your password"
-            type={showPassword ? 'text' : 'password'}
-            id="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            sx={{ color: 'black' }}
-          />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-            <Checkbox
-              checked={keepSignedIn}
-              onChange={(e) => setKeepSignedIn(e.target.checked)}
-              inputProps={{ 'aria-label': 'controlled' }}
+        <form action={action}>
+          <Box sx={{ mt: 2 }}>
+            <TextField
+              margin="normal"
+              fullWidth
+              id="email"
+              label="Email address"
+              name="email"
+              autoComplete="email"
               sx={{ color: 'black' }}
+              error={!!state.errors?.name}
+              helperText={state.errors?.email?.[0] || ''}
             />
-            <Link href="/forgot-password" sx={{ color: 'black' }}>Forget your password?</Link>
+            <TextField
+              margin="normal"
+              fullWidth
+              name="password"
+              label="Your password"
+              type='password'
+              id="password"
+              autoComplete="current-password"
+              sx={{ color: 'black' }}
+              error={!!state.errors?.name}
+              helperText={state.errors?.password?.[0] || ''}
+            />
+            {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+              <Checkbox
+                checked={keepSignedIn}
+                onChange={(e) => setKeepSignedIn(e.target.checked)}
+                inputProps={{ 'aria-label': 'controlled' }}
+                sx={{ color: 'black' }}
+              />
+              <Link href="/forgot-password" sx={{ color: 'black' }}>Forget your password?</Link>
+            </Box> */}
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2, color: 'black' }}
+              disabled={data.pending}
+            >
+              Log in
+            </Button>
+            <Link href="/sign-up" sx={{ color: 'black' }}>Don&apos;t have an account? Sign up</Link>
           </Box>
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2, color: 'black' }}
-          >
-            Log in
-          </Button>
-          <Link href="/sign-up" sx={{ color: 'black' }}>Don&apos;t have an account? Sign up</Link>
-        </Box>
+        </form>
       </StyledBox>
     </>
   );
