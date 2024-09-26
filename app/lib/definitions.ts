@@ -25,6 +25,14 @@ export type List = {
 // Type for the favorites relationship
 export type FavoriteList = {
     id: string;
+    name: string;
+    description: string;
+    created_at: string;
+};
+
+export type Favorite = {
+    id: string;
+    user_id: string;
     list_id: string;
     created_at: string;
 };
@@ -46,6 +54,7 @@ export type User = {
     id: string;
     name: string;
     email: string;
-    password: string;
-  };
+    password?: string;
+    created_at: string;
+};
   

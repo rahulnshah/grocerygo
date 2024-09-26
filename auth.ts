@@ -3,41 +3,81 @@ import { authConfig } from './auth.config';
 import Credentials from 'next-auth/providers/credentials';
 import GitHub from "next-auth/providers/github"
 import { z } from 'zod';
-import bcrypt from 'bcrypt';
 import { User } from './app/lib/definitions';
-import { sql } from '@vercel/postgres';
-
-async function getUser(email: string): Promise<User | undefined> {
-    try {
-        const user = await sql<User>`SELECT * FROM users WHERE email=${email}`;
-        return user.rows[0];
-    } catch (error) {
-        console.error('Failed to fetch user:', error);
-        throw new Error('Failed to fetch user.');
-    }
-}
-
-
+import { getUser } from './app/lib/data';
+import { createUser } from './app/lib/actions';
+import bcrypt from "bcrypt";
 export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig,
     providers: [
         GitHub,
         Credentials({
             async authorize(credentials) {
-                const parsedCredentials = z
-                    .object({ email: z.string().email({ message: "Not an email" }), password: z.string().min(6, { message: "Password must be at least 6 characters long" }) })
+                const parsedCredentials = z.object({ email: z.string().email({ message: "Not an email" }), password: z.string().min(6, { message: "Password must be at least 6 characters long" }) })
                     .safeParse(credentials);
 
                 if (parsedCredentials.success) {
                     const { email, password } = parsedCredentials.data;
-                    const user = await getUser(email);
+                    const user : User | undefined = await getUser(email);
                     if (!user) return null;
-                    const passwordsMatch = await bcrypt.compare(password, user.password);
+                    const passwordsMatch = await bcrypt.compare(password, user.password!);
 
-                    if (passwordsMatch) return user;
+                    if (passwordsMatch) {
+                        return {
+                            id: user.id,
+                            name: user.name,
+                            email: user.email,
+                            created_at: user.created_at  // Include created_at here
+                        };
+                    }
                 }
                 console.log('Invalid credentials');
                 return null;
             },
         })],
+    callbacks: {
+        async jwt({ token, user, session }) {
+            const email = user.email!;
+            // Check if a user with this email already exists
+            let existingUser : User | undefined = await getUser(email);
+
+            if (!existingUser) {
+                // Insert the user in the DB like you would submit a form
+                // User does not exist, insert them into the database
+                const formData = new FormData();
+                formData.set('name', user.name!);
+                formData.set('email', user.email!);
+
+                const result = await createUser({}, formData);
+
+                // Handle result of createUser, you can log or throw errors if needed
+                if (result.errors) {
+                    console.log(result.errors);
+                    throw new Error(result.message);
+                }
+
+                existingUser = await getUser(email);
+            }
+            // return all the stuff for the session for that same user
+            return {
+                ...token,
+                id: user.id,
+                name: user.name,
+                created_at: user.created_at,
+            };
+        },
+        async session({ session, token, user }) {
+            return {
+                ...session,
+                user: {
+                    id: token.id as string,
+                    name: token.name as string,
+                    created_at: token.created_at as string
+                }
+            };
+        }
+    },
+    session: {
+        strategy: "jwt"
+    }
 });

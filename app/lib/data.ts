@@ -4,18 +4,19 @@ import {
   FavoriteList,
   List,
   ListForm,
-  ItemForm
+  ItemForm,
+  User
 } from './definitions';
 
 import { unstable_noStore as noStore } from 'next/cache';
 
-export async function fetchList() {
+export async function fetchList(user_id: string) {
   // Add noStore() here prevent the response from being cached.
   // This is equivalent to in fetch(..., {cache: 'no-store'}).
   noStore();
 
   try {
-    const data = await sql<List>`SELECT * FROM lists LIMIT 20`;
+    const data = await sql<List>`SELECT * FROM lists WHERE list.user_id = ${user_id} LIMIT 20`;
     return data.rows;
   } catch (error) {
     console.error('Database Error:', error);
@@ -48,6 +49,8 @@ export async function fetchFavoriteLists() {
         favorites
       JOIN 
         lists ON favorites.list_id = lists.id
+      JOIN
+        favorites on favorites.user_id = users.id
       LIMIT 6`;
 
     return data.rows;
@@ -117,5 +120,16 @@ export async function isFavorited(list_id: string) {
   catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to check if list is favorited.');
+  }
+}
+
+
+export async function getUser(email: string): Promise<User | undefined> {
+  try {
+      const user = await sql<User>`SELECT * FROM users WHERE email=${email}`;
+      return user.rows[0];
+  } catch (error) {
+      console.error('Failed to fetch user:', error);
+      throw new Error('Failed to fetch user.');
   }
 }

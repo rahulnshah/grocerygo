@@ -5,7 +5,7 @@ import { Box, CircularProgress } from '@mui/material';
 import ListCard from './ListCard';
 import { fetchList } from '../../lib/data'
 
-const ListGrid = async () => {
+const ListGrid = async ({user_id}:{user_id: string}) => {
 //   const [lists, setLists] = useState<List[]>([]);
 //   const [loading, setLoading] = useState(true);
 
@@ -20,7 +20,7 @@ const ListGrid = async () => {
 //     getLists();
 //   }, []);
 
-  const lists = await fetchList();
+  const lists = await fetchList(user_id);
   return (
     <Box
       sx={{

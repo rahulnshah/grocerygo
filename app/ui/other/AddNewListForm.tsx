@@ -6,10 +6,14 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useFormState } from 'react-dom';
 import { createList } from '@/app/lib/actions';
 import { State } from '@/app/lib/actions';
+import { useSession } from "next-auth/react"
+
 
 const AddNewListForm = () => {
+  const { data: session, status } = useSession()
   const initialState: State = { message: null, errors: {} };
-  const [state, action] = useFormState(createList, initialState);
+  const createListWithListIdAndUserId = createList.bind(null, session?.user?.id!);
+  const [state, action] = useFormState(createListWithListIdAndUserId, initialState);
   return (
     <form action={action}>
       <Box sx={{

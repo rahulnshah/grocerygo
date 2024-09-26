@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
+import bcrypt from "bcrypt";
 
 const ListFormSchema = z.object({
   id: z.string(),
@@ -15,6 +16,7 @@ const ListFormSchema = z.object({
     invalid_type_error: 'Please enter valid description.',
   }).trim().min(1, { message: "Required" }),
   created_at: z.string(),
+  user_id: z.string(),
   updated_at: z.string()
 });
 
@@ -29,6 +31,18 @@ const ItemFormSchema = z.object({
   }),
   created_at: z.string(),
   updated_at: z.string()
+});
+
+const UserFormSchema = z.object({
+  id: z.string(),
+  name: z.string({
+    invalid_type_error: 'Please enter valid item name.',
+  }).trim().min(1, { message: "Required" }),
+  email: z.string().email({
+    message: 'Please enter valid email.',
+  }),
+  password: z.string().min(6, { message: "password length must be >= 6 characters" }).max(20, { message: "password length must be <= 20 characters" }).optional(),
+  created_at: z.string()
 });
 
 export type State = {
@@ -48,10 +62,20 @@ export type ItemState = {
   message?: string | null;
 };
 
-const CreateList = ListFormSchema.omit({ id: true, created_at: true, updated_at: true });
-const CreateItem = ItemFormSchema.omit({ id: true, list_id: true, created_at: true, updated_at: true });
+export type UserState = {
+  errors?: {
+    name?: string[];
+    email?: string[];
+    password?: string[];
+  };
+  message?: string | null;
+}
 
-export async function createList(prevState: State, formData: FormData) {
+const CreateList = ListFormSchema.omit({ id: true, user_id: true, created_at: true, updated_at: true });
+const CreateItem = ItemFormSchema.omit({ id: true, list_id: true, created_at: true, updated_at: true });
+const CreateUser = UserFormSchema.omit({ id: true, created_at: true })
+
+export async function createList(user_id: string, prevState: State, formData: FormData) {
   const validatedFields = CreateList.safeParse({
     name: formData.get('name'),
     description: formData.get('description')
@@ -70,8 +94,8 @@ export async function createList(prevState: State, formData: FormData) {
 
   try {
     await sql`
-        INSERT INTO lists (name, description)
-        VALUES (${name}, ${description})
+        INSERT INTO lists (user_id, name, description)
+        VALUES (${user_id}, ${name}, ${description})
       `;
     return { message: "Form submitted" }; // or some relevant message
   }
@@ -111,10 +135,85 @@ export async function createItem(list_id: string, prevState: ItemState, formData
   // redirect(`/notebook/items/${list_id}`);
 }
 
-export async function favoriteList(list_id: string) {
+export async function createUser(prevState: UserState, formData: FormData) {
+  const validatedFields = CreateUser.safeParse({
+    name: formData.get('name'),
+    email: formData.get('email'),
+    password: formData.get('password') || null
+  });
+
+  // If form validation fails, return errors early. Otherwise, continue.
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to create item.',
+    };
+  }
+
+  // Prepare data for insertion into the database
+  const { name, email, password } = validatedFields.data;
+  // Hash the password before storing it in the database
+  let hashedPassword = null;
+  if (password !== null) {
+    hashedPassword = await bcrypt.hash(password!, 10);
+  }
+
   try {
-    await sql`INSERT INTO favorites (list_id)
-      VALUES (${list_id})`;
+    // Insert the user into the database
+    await sql`INSERT INTO users (name, email, password)
+      VALUES (${name}, ${email}, ${hashedPassword})`;
+    return { message: "Form submitted" }; // or some relevant message
+  }
+  catch (error) {
+    return { message: 'Database Error: Failed to Create User.', };
+  }
+}
+
+export async function createUserAndRedirectToLogin(prevState: UserState, formData: FormData) {
+  // Validate the form data using zod (assuming CreateUser is a Zod schema)
+  const validatedFields = CreateUser.safeParse({
+    name: formData.get('name'),
+    email: formData.get('email'),
+    password: formData.get('password') || null
+  });
+
+  // If validation fails, return early with errors
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing or Invalid Fields. Failed to create user.',
+    };
+  }
+
+  const { name, email, password } = validatedFields.data;
+
+  try {
+    // Hash the password before storing it in the database
+    let hashedPassword = null;
+    if (password !== null) {
+      hashedPassword = await bcrypt.hash(password!, 10);
+    }
+
+    // Insert the user into the database
+    await sql`
+      INSERT INTO users (name, email, password)
+      VALUES (${name}, ${email}, ${hashedPassword})
+    `;
+
+    // Redirect to the login page upon successful registration
+    redirect('/login'); // Redirects to the login page after user creation
+  } catch (error) {
+    console.error('Database Error:', error);
+    return { message: 'Database Error: Failed to Create User.' };
+  }
+
+  return { message: 'User created successfully and redirected to login.' };
+}
+
+export async function favoriteList(user_id: string, list_id: string) {
+  try {
+    await sql`INSERT INTO favorites (user_id, list_id)
+      VALUES (${user_id}, ${list_id})`;
   }
   catch (error) {
     return { message: 'Database Error: Failed to favorite list.', };
