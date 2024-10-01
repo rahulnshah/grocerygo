@@ -5,7 +5,9 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
+import { getUser } from './data';
 import bcrypt from "bcrypt";
+import { User } from './definitions';
 
 const ListFormSchema = z.object({
   id: z.string(),
@@ -40,7 +42,7 @@ const UserFormSchema = z.object({
   }).trim().min(1, { message: "Required" }),
   email: z.string().email({
     message: 'Please enter valid email.',
-  }),
+  }).trim().min(1, { message: "Required" }),
   password: z.string().min(6, { message: "password length must be >= 6 characters" }).max(20, { message: "password length must be <= 20 characters" }).optional(),
   created_at: z.string()
 });
@@ -194,19 +196,22 @@ export async function createUserAndRedirectToLogin(prevState: UserState, formDat
       hashedPassword = await bcrypt.hash(password!, 10);
     }
 
+    let user : any = await getUser(email);
+    if(user)
+    {
+      return {message: `User with email ${email} already registered! Pick another email!`};
+    }
     // Insert the user into the database
     await sql`
       INSERT INTO users (name, email, password)
       VALUES (${name}, ${email}, ${hashedPassword})
     `;
-
-    // Redirect to the login page upon successful registration
-    redirect('/login'); // Redirects to the login page after user creation
   } catch (error) {
     console.error('Database Error:', error);
     return { message: 'Database Error: Failed to Create User.' };
   }
-
+  // Redirect to the login page upon successful registration
+  redirect('/login'); // Redirects to the login page after user creation
   return { message: 'User created successfully and redirected to login.' };
 }
 
@@ -355,3 +360,6 @@ export async function authenticate(
   }
 }
 
+export async function githubSignIn() {
+  await signIn("github");
+}

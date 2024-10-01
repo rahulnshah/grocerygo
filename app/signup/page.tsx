@@ -1,8 +1,8 @@
+"use client"
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import TextField from
-    '@mui/material/TextField';
+import TextField from '@mui/material/TextField';
 import Checkbox from '@mui/material/Checkbox';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -37,7 +37,7 @@ function SignUpPage() {
                     <Typography component="h1" variant="h5">
                         Welcome to GroceryGo
                     </Typography>
-                    <Box component="form" noValidate sx={{ mt: 1 }}>
+                    <Box>
                         <TextField
                             margin="normal"
                             required
@@ -70,8 +70,8 @@ function SignUpPage() {
                             type="password"
                             id="password"
                             autoComplete="current-password"
-                            error={!!state.errors?.email}
-                            helperText={state.errors?.email?.[0] || ''}
+                            error={!!state.errors?.password}
+                            helperText={state.errors?.password?.[0] || ''}
                         />
                         <Typography
                             variant="body2" sx={{ mt: 1 }}>
