@@ -128,7 +128,7 @@ export async function getUser(email: string){
   try {
       const user = await sql<User>`SELECT * FROM users WHERE email=${email}`;
       let row = user.rows[0];
-      console.log('User:', row);
+      // console.log('User:', row);
       return row;
   } catch (error) {
       console.error('Failed to fetch user:', error);
