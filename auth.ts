@@ -10,7 +10,10 @@ import bcrypt from "bcrypt";
 export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig,
     providers: [
-        GitHub,
+        GitHub({
+            clientId: process.env.AUTH_GITHUB_ID,
+            clientSecret: process.env.AUTH_GITHUB_SECRET,
+          }),
         Credentials({
             async authorize(credentials) {
                 const parsedCredentials = z.object({ email: z.string().email({ message: "Not an email" }), password: z.string().min(6, { message: "Password must be at least 6 characters long" }) })
@@ -23,11 +26,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     const passwordsMatch = await bcrypt.compare(password, user.password!);
 
                     if (passwordsMatch) {
-                        return {
+                        console.log('Credentials are valid', user);
+                        return{
                             id: user.id,
                             name: user.name,
                             email: user.email,
-                            created_at: user.created_at  // Include created_at here
+                            created_at: user.created_at,
                         };
                     }
                 }
@@ -36,8 +40,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             },
         })],
     callbacks: {
-        async jwt({ token, user, session }) {
+        async jwt({ token, user}) {
             console.log('jwt callback - trying to access email');
+            console.log("Inside jwt call back" , user);
             if (user && user.email && user.name) {
                 const email = user.email;
                 // Check if a user with this email already exists
@@ -74,6 +79,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return token;
         },
         async session({ session, token, user }) {
+            console.log('session callback - trying to access email', token);
             return {
                 ...session,
                 user: {
@@ -86,5 +92,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     session: {
         strategy: "jwt"
-    }
+    },
+    experimental: { enableWebAuthn: true },
 });

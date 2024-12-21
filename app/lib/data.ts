@@ -16,7 +16,7 @@ export async function fetchList(user_id: string) {
   noStore();
 
   try {
-    const data = await sql<List>`SELECT * FROM lists WHERE list.user_id = ${user_id} LIMIT 20`;
+    const data = await sql<List>`SELECT * FROM lists WHERE lists.user_id = ${user_id} LIMIT 20`;
     return data.rows;
   } catch (error) {
     console.error('Database Error:', error);

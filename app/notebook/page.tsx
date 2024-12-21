@@ -7,6 +7,6 @@ export default async function Page() {
   if (!session?.user) return null;
  
   return (
-    <NotebookPage user_id={session.user.id!} username={session.user.name!} />
+    <NotebookPage user_id={session.user.id} username={session.user.name} />
   )
 }

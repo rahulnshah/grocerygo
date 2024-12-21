@@ -1,6 +1,6 @@
-"use client";
 import ListGrid from '../ui/other/ListGrid';
 import AddNewListForm from '../ui/other/AddNewListForm';
+import { SessionProvider } from 'next-auth/react';
 
 const NotebookPage = ({ user_id, username }: { user_id: string; username: string }) => {
   return (
@@ -10,7 +10,7 @@ const NotebookPage = ({ user_id, username }: { user_id: string; username: string
         <ListGrid user_id={user_id} />
       </div>
       <div className="w-1/4">
-        <AddNewListForm />
+      <SessionProvider><AddNewListForm /></SessionProvider>
       </div>
     </div>
   );
