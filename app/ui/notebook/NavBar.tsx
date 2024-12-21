@@ -1,38 +1,53 @@
 'use client';
-import { signOut } from '@/auth';
-import { AppBar, Toolbar, Box, Button } from '@mui/material';
 import Link from 'next/link'; // Import Link from next/link
 import { usePathname } from 'next/navigation'; // Import usePathname
+import { signMeOut } from '@/app/lib/actions';
 
 const Navbar = () => {
-
   const pathname = usePathname(); // Get the current pathname
 
   // Helper function to determine if a link is active
   const isActive = (path: string) => pathname === path;
 
   return (
-    <AppBar position="static" style={{ backgroundColor: '#5B3A29' }}>
-      <Toolbar>
-        <Box display="flex" alignItems="center" flexGrow={1}>
-          <Link href="/notebook">
-            <Button color={isActive('/notebook') ? 'secondary' : 'inherit'}>Home</Button>
+    <nav className="bg-[#5B3A29]">
+      <div className="flex items-center justify-between p-4">
+        <div className="flex items-center space-x-4">
+          <Link
+            href="/notebook"
+            className={`${
+              isActive('/notebook') ? 'text-secondary' : 'text-white'
+            } hover:text-gray-200`}
+          >
+            Home
           </Link>
-          <Link href="/notebook/saved">
-            <Button color={isActive('/notebook/saved') ? 'secondary' : 'inherit'}>Saved</Button>
+          <Link
+            href="/notebook/saved"
+            className={`${
+              isActive('/notebook/saved') ? 'text-secondary' : 'text-white'
+            } hover:text-gray-200`}
+          >
+            Saved
           </Link>
-          <Link href="/notebook/shared">
-            <Button color={isActive('/notebook/shared') ? 'secondary' : 'inherit'}>Shared</Button>
+          <Link
+            href="/notebook/shared"
+            className={`${
+              isActive('/notebook/shared') ? 'text-secondary' : 'text-white'
+            } hover:text-gray-200`}
+          >
+            Shared
           </Link>
-        </Box>
-        <form action={async () => {
-          'use server';
-          await signOut();
-        }}>
-          <Button color="inherit">Log out</Button>
+        </div>
+        <form action={async () => signMeOut()}>
+          <button
+            type="submit"
+            className="text-white hover:text-gray-200"
+          >
+            Log out
+          </button>
         </form>
-      </Toolbar>
-    </AppBar>
+      </div>
+    </nav>
   );
 };
 

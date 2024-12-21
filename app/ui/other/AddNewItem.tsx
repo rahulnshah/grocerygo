@@ -1,59 +1,56 @@
 'use client'
 import React from 'react';
-import { Box, TextField, Button, Typography, IconButton, Checkbox, FormHelperText } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import CloseIcon from '@mui/icons-material/Close';
 import { createItem } from '@/app/lib/actions';
 import { ItemState } from '@/app/lib/actions';
-import { useFormState } from 'react-dom';
-const AddNewItem = ({list_id}:{list_id: string}) => {
+import { useActionState } from 'react';
+
+const AddNewItem = ({ list_id }: { list_id: string }) => {
   const initialState: ItemState = { message: null, errors: {} };
   const createItemWithListId = createItem.bind(null, list_id);
-  const [state, formAction] = useFormState(createItemWithListId, initialState);
+  const [state, formAction] = useActionState(createItemWithListId, initialState);
+
   return (
     <form action={formAction}>
-      <Box sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        width: 300,
-        padding: 2,
-        borderRadius: 1,
-        boxShadow: 1,
-        backgroundColor: 'white',
-        position: 'relative'
-      }}>
-        <IconButton sx={{ position: 'absolute', top: 8, right: 8 }}>
-          <CloseIcon />
-        </IconButton>
-        <Typography variant="h6">Add New Item</Typography>
-        <TextField
-          variant="outlined"
-          placeholder="Search"
-          InputProps={{
-            startAdornment: <SearchIcon sx={{ mr: 1 }} />
-          }}
-          sx={{ mt: 2 }}
-        />
-        <TextField
-          label="Item name"
-          variant="outlined"
-          name="name"
-          fullWidth
-          sx={{ mt: 2 }}
-          error={!!state.errors?.name}
-          helperText={state.errors?.name?.[0] || ''}
-        />
-        <Checkbox name='is_checked'/>
-        {!!state.errors?.is_checked?.[0] &&  <FormHelperText>{state.errors?.is_checked?.[0]}</FormHelperText>}
-        <Button
-          variant="contained"
-          sx={{ mt: 2, backgroundColor: '#ED9121', color: 'white' }}
-          fullWidth
+      <div className="flex flex-col w-72 p-4 rounded-lg shadow-lg bg-white relative">
+        <button type="button" className="absolute top-2 right-2">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <h2 className="text-xl font-semibold mb-4">Add New Item</h2>
+        
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search"
+            className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700">Item name</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${state.errors?.name ? 'border-red-500' : 'border-gray-300'}`}
+          />
+          {state.errors?.name && <p className="mt-1 text-sm text-red-500">{state.errors?.name[0]}</p>}
+        </div>
+
+        <div className="flex items-center mb-4">
+          <input type="checkbox" name="is_checked" id="is_checked" className="mr-2" />
+          <label htmlFor="is_checked" className="text-sm text-gray-700">Checked</label>
+        </div>
+        {state.errors?.is_checked && <p className="mt-1 text-sm text-red-500">{state.errors?.is_checked[0]}</p>}
+
+        <button
           type="submit"
+          className="w-full py-2 px-4 mt-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
         >
           Add
-        </Button>
-      </Box>
+        </button>
+      </div>
     </form>
   );
 };

@@ -1,35 +1,20 @@
 'use client'
 import React from 'react';
-import { Box, Typography } from '@mui/material';
 import { DeleteItem } from '../item/DeleteItem';
-// import { CheckItem } from '../edititem/CheckItem';
-import TextField from '@mui/material/TextField';
 import EditItemForm from '../item/EditItemForm';
 import { ItemForm } from '@/app/lib/definitions';
 
 const ToBuyItem = ({ item }: { item: ItemForm }) => {
-
   return (
-    <>
-      <Box sx={{
-        display: 'flex',
-        alignItems: 'center',
-        padding: 2,
-        borderRadius: 1,
-        boxShadow: 1,
-        backgroundColor: item.is_checked ? 'orange' : 'white',
-        mt: 2
-      }}>
-        <Box sx={{ flex: 1 }}>
-          <EditItemForm item={item} />
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="body2" sx={{ mr: 1 }}>You</Typography>
-          <DeleteItem id={item.id} list_id={item.list_id} />
-          {/* <CheckItem id={item_id} list_id={list_id}/> */}
-        </Box>
-      </Box>
-    </>
+    <div className={`flex items-center p-2 rounded-lg shadow-md mt-2 ${item.is_checked ? 'bg-orange-500' : 'bg-white'}`}>
+      <div className="flex-1">
+        <EditItemForm item={item} />
+      </div>
+      <div className="flex items-center">
+        <p className="text-sm mr-1">You</p>
+        <DeleteItem id={item.id} list_id={item.list_id} />
+      </div>
+    </div>
   );
 };
 

@@ -1,82 +1,50 @@
 import React from 'react';
-import { Box, Typography, IconButton, Avatar, Badge } from '@mui/material';
 import FavIcon from '../list/FavIcon';
 import Link from 'next/link';
-import MailIcon from '@mui/icons-material/Mail';
-import ShareIcon from '@mui/icons-material/Share';
-import EditIcon from '@mui/icons-material/Edit';
 import { fetchListData, isFavorited } from '@/app/lib/data';
 import { DeleteList } from '../notebook/DeleteList';
 import { UpdateList } from '../notebook/UpdateList';
-import { redirect } from 'next/navigation';
+
 const ListCard = async ({ title, description, list_id }: { title: string, description: string, list_id: string }) => {
   const { numItems, numCheckedItems } = await fetchListData(list_id);
   const is_favorited = await isFavorited(list_id);
-  // const [numItems, setNumItems] = useState("0");
-  // const [numCheckedItems, setNumCheckedItems] = useState("0");
-  // const router = useRouter();
-
-  // const handleClick = () => {
-  //   router.push(`/notebook/items/${list_id}`);
-  // };
-
-  // useEffect(() => {
-  //   const getListInfo = () => {
-  //     Promise.all([
-  //       fetch(`/api/items/checked/${list_id}`).then(res => {
-  //         if (!res.ok) throw new Error('Failed to fetch checked items');
-  //         return res.json();
-  //       }),
-  //       fetch(`/api/items/count/${list_id}`).then(res => {
-  //         if (!res.ok) throw new Error('Failed to fetch item count');
-  //         return res.json();
-  //       })
-  //     ])
-  //     .then(([numCheckedItemsData, numItemsData]) => {
-  //       setNumCheckedItems(numCheckedItemsData);
-  //       setNumItems(numItemsData);
-  //     })
-  //     .catch(error => {
-  //       console.error('Error fetching items:', error)        
-  //     });
-  //   };
-  //   getListInfo();
-  // }, []);
 
   return (
-
-    <Box sx={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      padding: 2,
-      borderRadius: 1,
-      boxShadow: 1,
-      backgroundColor: 'white',
-      mt: 2
-    }}>
-      <Link href={`/notebook/items/${list_id}`}>
-        <Typography variant="h6">{title}</Typography>
-        <Typography variant="h6">{description}</Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-          <Avatar src="path/to/avatar1.jpg" sx={{ width: 24, height: 24 }} />
-          <Avatar src="path/to/avatar2.jpg" sx={{ width: 24, height: 24, ml: -1 }} />
-          <Badge badgeContent={2} color="primary" sx={{ ml: 1 }} />
-        </Box>
+    <div className="flex flex-col items-center p-4 rounded-lg shadow-lg bg-white mt-2">
+      <Link href={`/notebook/items/${list_id}`} className="text-lg font-semibold">
+        <h3>{title}</h3>
+        <p className="text-sm text-gray-600">{description}</p>
+        <div className="flex items-center mt-2">
+          <img src="path/to/avatar1.jpg" alt="Avatar 1" className="w-6 h-6 rounded-full" />
+          <img src="path/to/avatar2.jpg" alt="Avatar 2" className="w-6 h-6 rounded-full -ml-2" />
+          <div className="ml-2 text-sm text-gray-500">2</div>
+        </div>
       </Link>
-      <Typography variant="body2" color="textSecondary">{numCheckedItems} out of {numItems} completed</Typography>
-      <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-        <FavIcon isFavorited={is_favorited} list_id={list_id}/>
-        <IconButton>
-          <MailIcon sx={{ color: '#ED9121' }} />
-        </IconButton>
-        <IconButton>
-          <ShareIcon sx={{ color: '#ED9121' }} />
-        </IconButton>
+      <p className="text-xs text-gray-500 mt-1">{numCheckedItems} out of {numItems} completed</p>
+      <div className="flex items-center mt-2 space-x-2">
+        <FavIcon isFavorited={is_favorited} list_id={list_id} />
+        
+        {/* Mail Icon */}
+        <button className="p-2 text-orange-500 hover:bg-orange-100 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-300">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6l9 6 9-6M4 18l8-5 8 5" />
+          </svg>
+        </button>
+
+        {/* Share Icon */}
+        <button className="p-2 text-orange-500 hover:bg-orange-100 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-300">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </button>
+
+        {/* Update List Button */}
         <UpdateList id={list_id} />
+        
+        {/* Delete List Button */}
         <DeleteList id={list_id} />
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 

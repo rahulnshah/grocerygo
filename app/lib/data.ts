@@ -50,7 +50,7 @@ export async function fetchFavoriteLists() {
       JOIN 
         lists ON favorites.list_id = lists.id
       JOIN
-        favorites on favorites.user_id = users.id
+        users on favorites.user_id = users.id
       LIMIT 6`;
 
     return data.rows;

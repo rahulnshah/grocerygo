@@ -1,12 +1,12 @@
 // app/notebook/page.tsx
-import { Box, Typography } from '@mui/material';
+import { Box } from 'react'; 
 
 const SharedPage = () => {
   return (
-    <Box>
-      <Typography variant="h1">Hello Rahul!</Typography>
+    <div className="p-4">
+      <h1 className="text-4xl font-bold text-gray-900">Hello Rahul!</h1>
       {/* Add more content here */}
-    </Box>
+    </div>
   );
 };
 

@@ -1,17 +1,11 @@
+'use client';
 import React, { useState } from 'react';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
 
-
-const EmailModal = ({ isOpen } : {isOpen : boolean }) => {
+const EmailModal = ({ isOpen }: { isOpen: boolean }) => {
   const [email, setEmail] = useState('');
 
   const handleClose = () => {
-    /*handleClode logic here */
+    // handle close logic here
   };
 
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,56 +19,44 @@ const EmailModal = ({ isOpen } : {isOpen : boolean }) => {
   };
 
   return (
-    <Box
-      sx={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        zIndex: 1000,
-        visibility: isOpen ? 'visible' : 'hidden',
-      }}
+    <div
+      className={`fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50 ${isOpen ? 'block' : 'hidden'}`}
     >
-      <Box
-        sx={{
-          backgroundColor: 'white',
-          borderRadius: 8,
-          padding: 4,
-          width: '300px',
-          textAlign: 'center',
-        }}
-      >
-        <Typography variant="h6" component="h2">
-          Email &quot;Grocery Shopping List&quot;
-        </Typography>
-        <Typography variant="body1" color="textSecondary">
-          Join thousands getting emails in their inbox.
-        </Typography>
-        <TextField
-          fullWidth
-          label="To"
+      <div className="bg-white p-6 rounded-lg w-80 text-center relative">
+        <h2 className="text-lg font-semibold mb-2">Email &quot;Grocery Shopping List&quot;</h2>
+        <p className="text-sm text-gray-600 mb-4">Join thousands getting emails in their inbox.</p>
+        <input
+          type="email"
+          className="w-full p-2 border rounded-md mb-4"
+          placeholder="To"
           value={email}
           onChange={handleEmailChange}
-          margin="normal"
         />
-        <Button
-          variant="contained"
-          color="primary"
-          fullWidth
+        <button
+          className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
           onClick={handleSubmit}
         >
           Send it!
-        </Button>
-        <IconButton onClick={handleClose} sx={{ position: 'absolute', top: 8, right: 8 }}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
-    </Box>
+        </button>
+        <button
+          className="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-700"
+          onClick={handleClose}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+            className="w-6 h-6"
+          >
+            <path
+              fillRule="evenodd"
+              d="M6 18L18 6M6 6l12 12"
+              clipRule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
   );
 };
 

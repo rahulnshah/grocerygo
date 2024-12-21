@@ -1,19 +1,14 @@
-import { Box, Container, CssBaseline, ThemeProvider } from '@mui/material';
 import { ReactNode } from 'react';
-import theme from '../../theme';
 import Navbar from '../ui/notebook/NavBar';
 
 const NotebookLayout = ({ children }: { children: ReactNode }) => {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <div className="min-h-screen bg-gray-100">
       <Navbar />
-        <Container>
-          <Box pt={2}>
-            {children}
-          </Box>
-        </Container>
-    </ThemeProvider>
+      <div className="container mx-auto px-4">
+        <div className="pt-8">{children}</div>
+      </div>
+    </div>
   );
 };
 

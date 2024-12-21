@@ -1,7 +1,4 @@
 import React from 'react';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
 
 interface ItemCountNotificationProps {
   itemCount: number;
@@ -13,25 +10,17 @@ const ItemCountNotification: React.FC<ItemCountNotificationProps> = ({
   onDismiss,
 }) => {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#ED9121',
-        borderRadius: 8,
-        padding: 2,
-        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-      }}
-    >
-      <Typography variant="body1" component="p">
+    <div className="flex flex-col items-center justify-center bg-orange-500 text-white rounded-xl p-4 shadow-md">
+      <p className="text-base">
         {itemCount} items assigned to You
-      </Typography>
-      <Button variant="contained" color="primary" onClick={onDismiss}>
+      </p>
+      <button
+        className="mt-2 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none"
+        onClick={onDismiss}
+      >
         Dismiss
-      </Button>
-    </Box>
+      </button>
+    </div>
   );
 };
 

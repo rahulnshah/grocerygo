@@ -1,36 +1,18 @@
 // components/ListGrid.tsx
-// "use client"
-import React, { useEffect, useState } from 'react';
-import { Box, CircularProgress } from '@mui/material';
+import React from 'react';
 import ListCard from './ListCard';
-import { fetchList } from '../../lib/data'
+import { fetchList } from '../../lib/data';
 
-const ListGrid = async ({user_id}:{user_id: string}) => {
-//   const [lists, setLists] = useState<List[]>([]);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const getLists = () => {
-//       fetch('/api/lists')
-//       .then(res => res.json())
-//       .then(fetchedLists => setLists(fetchedLists))
-//       .catch(error => console.error('Error fetching items:', error))
-//       .finally(() => setLoading(false));
-//     };
-//     getLists();
-//   }, []);
-
+const ListGrid = async ({ user_id }: { user_id: string }) => {
   const lists = await fetchList(user_id);
+
   return (
-    <Box
-      sx={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: 2,
-        width: '50%',
-      }}
-    >
-    {(
+    <div className="grid grid-cols-3 gap-4 w-1/2 mx-auto mt-4">
+      {lists.length === 0 ? (
+        <div className="col-span-3 text-center text-gray-500">
+          No lists available.
+        </div>
+      ) : (
         lists.map((list) => (
           <ListCard
             key={list.id}
@@ -40,7 +22,7 @@ const ListGrid = async ({user_id}:{user_id: string}) => {
           />
         ))
       )}
-    </Box>
+    </div>
   );
 };
 

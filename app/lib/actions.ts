@@ -8,6 +8,7 @@ import { AuthError } from 'next-auth';
 import { getUser } from './data';
 import bcrypt from "bcrypt";
 import { User } from './definitions';
+import { signOut } from '@/auth';
 
 const ListFormSchema = z.object({
   id: z.string(),
@@ -106,7 +107,6 @@ export async function createList(user_id: string, prevState: State, formData: Fo
   }
 
   revalidatePath('/notebook');
-  // redirect('/notebook');
 }
 
 export async function createItem(list_id: string, prevState: ItemState, formData: FormData) {
@@ -134,7 +134,6 @@ export async function createItem(list_id: string, prevState: ItemState, formData
     return { message: 'Database Error: Failed to Create Item.', };
   }
   revalidatePath(`/notebook/items/${list_id}`);
-  // redirect(`/notebook/items/${list_id}`);
 }
 
 export async function createUser(prevState: UserState, formData: FormData) {
@@ -212,7 +211,6 @@ export async function createUserAndRedirectToLogin(prevState: UserState, formDat
   }
   // Redirect to the login page upon successful registration
   redirect('/login'); // Redirects to the login page after user creation
-  return { message: 'User created successfully and redirected to login.' };
 }
 
 export async function favoriteList(user_id: string, list_id: string) {
@@ -301,7 +299,7 @@ export async function updateItem(id: string, list_id: string, prevState: ItemSta
     return { message: 'Database Error: Failed to Update Item.', };
   }
   revalidatePath(`/notebook/items/${list_id}`);
-  // redirect(`/notebook/items/${list_id}`);
+  redirect(`/notebook/items/${list_id}`);
 }
 
 export async function checkItem(id: string, list_id: string) {
@@ -314,7 +312,7 @@ export async function checkItem(id: string, list_id: string) {
     return { message: 'Database Error: Failed to check item.', };
   }
   revalidatePath(`/notebook/items/${list_id}`);
-  // redirect(`/notebook/items/${list_id}`);
+  redirect(`/notebook/items/${list_id}`);
 }
 
 export async function deleteList(id: string) {
@@ -362,4 +360,8 @@ export async function authenticate(
 
 export async function githubSignIn() {
   await signIn("github");
+}
+
+export async function signMeOut(){
+  await signOut();
 }

@@ -1,23 +1,16 @@
 import React from 'react';
-import { Box, Typography, Button } from '@mui/material';
 
 const HistoryItem = ({ headline }: { headline: string }) => {
   return (
-    <Box sx={{
-      display: 'flex',
-      alignItems: 'center',
-      padding: 2,
-      borderRadius: 1,
-      boxShadow: 1,
-      backgroundColor: 'white',
-      mt: 2
-    }}>
-      <Box sx={{ flex: 1 }}>
-        <Typography variant="body2" color="textSecondary">30 mins ago</Typography>
-        <Typography variant="h6">{headline}</Typography>
-      </Box>
-      <Button variant="contained" sx={{ backgroundColor: '#ED9121', color: 'white' }}>Add</Button>
-    </Box>
+    <div className="flex items-center p-4 rounded-lg shadow-lg bg-white mt-2">
+      <div className="flex-1">
+        <p className="text-sm text-gray-500">30 mins ago</p>
+        <h3 className="text-lg font-semibold">{headline}</h3>
+      </div>
+      <button className="bg-orange-500 text-white py-2 px-4 rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500">
+        Add
+      </button>
+    </div>
   );
 };
 
