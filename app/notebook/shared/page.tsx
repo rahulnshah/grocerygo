@@ -1,6 +1,4 @@
 // app/notebook/page.tsx
-import { Box } from 'react'; 
-
 const SharedPage = () => {
   return (
     <div className="p-4">
