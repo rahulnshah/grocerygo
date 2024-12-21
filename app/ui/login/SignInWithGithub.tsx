@@ -1,12 +1,16 @@
 
-import { githubSignIn } from "@/app/lib/actions"
+import { signIn } from '@/auth';
 
-export default function SignInWithGithub() {
+export default async function SignInWithGithub() {
     return (
-        <form
-            action={githubSignIn}
-        >
-            <button type="submit">Sign in with GitHub</button>
-        </form>
+        <>
+            <form
+                action={async () => {
+                    await signIn("github");
+                }}
+            >
+                <button type="submit">Sign in with GitHub</button>
+            </form>
+        </>
     )
 } 

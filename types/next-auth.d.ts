@@ -1,18 +1,20 @@
 // types/next-auth.d.ts
-
 import NextAuth from "next-auth";
-
-// Extend the default User type with created_at
 declare module "next-auth" {
-  interface User {
-    created_at?: string;
-    name?: string;
+  interface Session {
+    user: {
+      id: string;
+      name: string;
+      email: string; // Add custom properties here
+      created_at: string;
+    }  & DefaultSession["user"]
   }
-}
 
-// Extend JWT to include created_at
-declare module "next-auth/jwt" {
-  interface JWT {
-    created_at?: string;
+  interface User {
+    id: string;
+    name: string;
+    email: string;
+    created_at: string;
+    // Include any other custom properties you want
   }
 }

@@ -1,8 +1,7 @@
 'use client';
 import Link from 'next/link'; // Import Link from next/link
 import { usePathname } from 'next/navigation'; // Import usePathname
-import { signMeOut } from '@/app/lib/actions';
-
+import LogOutButton from '../logout/LogOutButton';
 const Navbar = () => {
   const pathname = usePathname(); // Get the current pathname
 
@@ -38,14 +37,7 @@ const Navbar = () => {
             Shared
           </Link>
         </div>
-        <form action={async () => signMeOut()}>
-          <button
-            type="submit"
-            className="text-white hover:text-gray-200"
-          >
-            Log out
-          </button>
-        </form>
+        
       </div>
     </nav>
   );

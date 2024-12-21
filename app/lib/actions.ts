@@ -8,7 +8,6 @@ import { AuthError } from 'next-auth';
 import { getUser } from './data';
 import bcrypt from "bcrypt";
 import { User } from './definitions';
-import { signOut } from '@/auth';
 
 const ListFormSchema = z.object({
   id: z.string(),
@@ -362,6 +361,3 @@ export async function githubSignIn() {
   await signIn("github");
 }
 
-export async function signMeOut(){
-  await signOut();
-}

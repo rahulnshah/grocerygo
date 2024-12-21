@@ -18,7 +18,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
                 if (parsedCredentials.success) {
                     const { email, password } = parsedCredentials.data;
-                    const user : User | undefined = await getUser(email);
+                    const user: User = await getUser(email);
                     if (!user) return null;
                     const passwordsMatch = await bcrypt.compare(password, user.password!);
 
@@ -37,34 +37,41 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         })],
     callbacks: {
         async jwt({ token, user, session }) {
-            const email = user.email!;
-            // Check if a user with this email already exists
-            let existingUser : User | undefined = await getUser(email);
+            console.log('jwt callback - trying to access email');
+            if (user && user.email && user.name) {
+                const email = user.email;
+                // Check if a user with this email already exists
+                let existingUser: User = await getUser(email);
 
-            if (!existingUser) {
-                // Insert the user in the DB like you would submit a form
-                // User does not exist, insert them into the database
-                const formData = new FormData();
-                formData.set('name', user.name!);
-                formData.set('email', user.email!);
+                if (!existingUser) {
+                    // Insert the user in the DB like you would submit a form
+                    // User does not exist, insert them into the database
+                    const formData = new FormData();
+                    formData.set('name', user.name);
+                    formData.set('email', user.email);
 
-                const result = await createUser({}, formData);
+                    const result = await createUser({}, formData);
 
-                // Handle result of createUser, you can log or throw errors if needed
-                if (result.errors) {
-                    console.log(result.errors);
-                    throw new Error(result.message);
+                    // Handle result of createUser, you can log or throw errors if needed
+                    if (result.errors) {
+                        console.log(result.errors);
+                        throw new Error(result.message);
+                    }
+
+                    existingUser = await getUser(email);
                 }
-
-                existingUser = await getUser(email);
+                // return all the stuff for the session for that same user
+                return {
+                    ...token,
+                    id: existingUser.id,
+                    name: existingUser.name,
+                    created_at: existingUser.created_at,
+                };
             }
-            // return all the stuff for the session for that same user
-            return {
-                ...token,
-                id: user.id,
-                name: user.name,
-                created_at: user.created_at,
-            };
+            else {
+                console.log('User object does not have an email property');
+            }
+            return token;
         },
         async session({ session, token, user }) {
             return {

@@ -10,17 +10,6 @@ function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  /*const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    setIsSubmitting(true);
-
-    // Handle login logic here
-    console.log('Email:', email);
-    console.log('Password:', password);
-    console.log('Errors:', errors);
-    setIsSubmitting(false);
-  };*/
   const [errorMessage, formAction, isPending] = useActionState(
     authenticate,
     undefined,
@@ -40,9 +29,9 @@ function LoginPage() {
 
         <div className="w-full space-y-4">
           {/* Social login buttons */}
-          <SignInWithGithub />
-        </div>
 
+        </div>
+        
         <p className="text-sm text-center my-4 text-black">OR</p>
 
         <form action={formAction} className="w-full space-y-4">
