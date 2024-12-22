@@ -51,7 +51,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     const formData = new FormData();
                     formData.set('name', user.name);
                     formData.set('email', user.email);
-
+                    formData.set('password', "examplePassword");
                     const result = await createUser({}, formData);
 
                     // Handle result of createUser, you can log or throw errors if needed
