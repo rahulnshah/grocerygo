@@ -8,7 +8,7 @@ import { UpdateList } from '../notebook/UpdateList';
 
 const ListCard = async ({ title, description, list_id }: { title: string, description: string, list_id: string }) => {
   const { numItems, numCheckedItems } = await fetchListData(list_id);
-  const is_favorited = await isFavorited(list_id);
+  const is_favorited : boolean = await isFavorited(list_id);
   const session = await auth();
  
   if (!session?.user) return null;

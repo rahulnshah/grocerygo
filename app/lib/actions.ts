@@ -9,6 +9,13 @@ import { getUser } from './data';
 import bcrypt from "bcrypt";
 import { User } from './definitions';
 
+const FavoriteFormSchema = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  list_id: z.string(),
+  created_at: z.string()
+});
+
 const ListFormSchema = z.object({
   id: z.string(),
   name: z.string({
@@ -73,9 +80,18 @@ export type UserState = {
   message?: string | null;
 }
 
+export type FavoriteState = {
+  errors?: {
+    list_id?: string[];
+    user_id?: string[];
+  };
+  message?: string | null;
+}
+
 const CreateList = ListFormSchema.omit({ id: true, user_id: true, created_at: true, updated_at: true });
 const CreateItem = ItemFormSchema.omit({ id: true, list_id: true, created_at: true, updated_at: true });
 const CreateUser = UserFormSchema.omit({ id: true, created_at: true })
+const CreateFavorite = FavoriteFormSchema.omit({ id: true, created_at: true });
 
 export async function createList(user_id: string, prevState: State, formData: FormData) {
   const validatedFields = CreateList.safeParse({
@@ -212,7 +228,23 @@ export async function createUserAndRedirectToLogin(prevState: UserState, formDat
   redirect('/login'); // Redirects to the login page after user creation
 }
 
-export async function favoriteList(user_id: string, list_id: string) {
+export async function favoriteList(prevState: FavoriteState, formData: FormData) {
+  console.log('formData', formData);
+   // Validate the form data using zod (assuming CreateUser is a Zod schema)
+   const validatedFields = CreateFavorite.safeParse({
+    list_id: formData.get('list_id'),
+    user_id: formData.get('user_id')
+  });
+
+  // If validation fails, return early with errors
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing or Invalid Fields. Failed to create favorite list.',
+    };
+  }
+
+  const { list_id, user_id } = validatedFields.data;
   try {
     await sql`INSERT INTO favorites (user_id, list_id)
       VALUES (${user_id}, ${list_id})`;
@@ -227,7 +259,7 @@ export async function favoriteList(user_id: string, list_id: string) {
 export async function unFavoriteList(user_id: string, list_id: string) {
   try {
     await sql`DELETE FROM favorites WHERE list_id = ${list_id} AND user_id = ${user_id}`;
-    return { message: 'Database Error: Failed to unfavorite list.', };
+    //return { message: 'diddy', };
   }
   catch (error) {
     return { message: 'Database Error: Failed to unfavorite list.', };
@@ -299,7 +331,6 @@ export async function updateItem(id: string, list_id: string, prevState: ItemSta
     return { message: 'Database Error: Failed to Update Item.', };
   }
   revalidatePath(`/notebook/items/${list_id}`);
-  redirect(`/notebook/items/${list_id}`);
 }
 
 export async function checkItem(id: string, list_id: string) {

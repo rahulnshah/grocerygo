@@ -1,13 +1,13 @@
 "use client";
-import React, { useState } from "react";
+//import React, { useState } from "react";
 import { ItemState } from "@/app/lib/actions";
 import { ItemForm } from "@/app/lib/definitions";
 import { updateItem } from "@/app/lib/actions";
 import { useActionState } from "react";
 
 const EditItemForm = ({ item }: { item: ItemForm }) => {
-  const [name, setName] = useState(item.name);
-  const [isChecked, setIsChecked] = useState(item.is_checked);
+  // const [name, setName] = useState(item.name);
+  // const [isChecked, setIsChecked] = useState(item.is_checked);
 
   const initialState: ItemState = { errors: {}, message: null };
   const updateItemWithId = updateItem.bind(null, item.id, item.list_id);
@@ -23,14 +23,14 @@ const EditItemForm = ({ item }: { item: ItemForm }) => {
           type="text"
           name="name"
           id="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          defaultValue={item.name}
+          placeholder="Enter name"
           className={`p-2 border rounded-md focus:outline-none focus:ring-2 ${
-            state.errors?.name ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+            state?.errors?.name ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
           }`}
         />
-        {state.errors?.name && (
-          <span className="text-sm text-red-500">{state.errors?.name[0]}</span>
+        {state?.errors?.name && (
+          <span className="text-sm text-red-500">{state?.errors?.name[0]}</span>
         )}
       </div>
       <div className="flex items-center">
@@ -38,16 +38,15 @@ const EditItemForm = ({ item }: { item: ItemForm }) => {
           type="checkbox"
           name="is_checked"
           id="is_checked"
-          checked={isChecked}
-          onChange={(e) => setIsChecked(e.target.checked)}
+          defaultChecked={item.is_checked}
           className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
         />
         <label htmlFor="is_checked" className="ml-2 text-sm text-gray-700">
           Checked
         </label>
       </div>
-      {state.errors?.is_checked?.[0] && (
-        <span className="text-sm text-red-500">{state.errors.is_checked[0]}</span>
+      {state?.errors?.is_checked?.[0] && (
+        <span className="text-sm text-red-500">{state?.errors.is_checked[0]}</span>
       )}
       <button
         type="submit"

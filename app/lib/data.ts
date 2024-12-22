@@ -104,7 +104,7 @@ export async function fetchListById(id: string) {
   }
 }
 
-export async function isFavorited(list_id: string) {
+export async function isFavorited(list_id: string):Promise<boolean> {
   noStore();
   try {
     const result = await sql`
