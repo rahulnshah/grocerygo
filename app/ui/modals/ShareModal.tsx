@@ -63,9 +63,9 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, users }) => {
           </button>
         </div>
 
-        <Typography variant="body2" className="mb-2">
+        <p className="mb-2 text-sm font-medium">
           Invited Users:
-        </Typography>
+        </p>
 
         {users.length > 0 ? (
           users.map((user, index) => (
