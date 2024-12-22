@@ -295,12 +295,11 @@ export async function updateList(id: string, prevState: State, formData: FormDat
       SET name = ${name}, description = ${description}
       WHERE id = ${id}
   `;
-    return { message: "Form submitted" }; // or some relevant message
+    // return { message: "Form submitted" }; // or some relevant message
   }
   catch (error) {
     return { message: 'Database Error: Failed to Update List.', };
   }
-  revalidatePath('/notebook');
   redirect('/notebook');
 }
 
@@ -343,7 +342,7 @@ export async function checkItem(id: string, list_id: string) {
     return { message: 'Database Error: Failed to check item.', };
   }
   revalidatePath(`/notebook/items/${list_id}`);
-  redirect(`/notebook/items/${list_id}`);
+  //redirect(`/notebook/items/${list_id}`);
 }
 
 export async function deleteList(id: string) {
