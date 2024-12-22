@@ -50,7 +50,9 @@ const UserFormSchema = z.object({
   email: z.string().email({
     message: 'Please enter valid email.',
   }).trim().min(1, { message: "Required" }),
-  password: z.string().min(6, { message: "password length must be >= 6 characters" }).max(20, { message: "password length must be <= 20 characters" }).optional(),
+  password: z.string({
+    invalid_type_error: 'Please enter valid password',
+  }).min(6, { message: "password length must be >= 6 characters" }).max(20, { message: "password length must be <= 20 characters" }).optional(),
   created_at: z.string()
 });
 
@@ -115,13 +117,12 @@ export async function createList(user_id: string, prevState: State, formData: Fo
         INSERT INTO lists (user_id, name, description)
         VALUES (${user_id}, ${name}, ${description})
       `;
-    // return { message: "Form submitted" }; // or some relevant message
+    revalidatePath('/notebook');
+    return { message: "Form submitted" }; // or some relevant message
   }
   catch (error) {
     return { message: 'Database Error: Failed to Create List.', };
   }
-
-  revalidatePath('/notebook');
 }
 
 export async function createItem(list_id: string, prevState: ItemState, formData: FormData) {
@@ -143,12 +144,12 @@ export async function createItem(list_id: string, prevState: ItemState, formData
   try {
     await sql`INSERT INTO items (name, list_id, is_checked)
       VALUES (${name}, ${list_id}, ${is_checked})`;
-    //return { message: "Form submitted" }; // or some relevant message
+    revalidatePath(`/notebook/items/${list_id}`);
+    return { message: "Form submitted" }; // or some relevant message
   }
   catch (error) {
     return { message: 'Database Error: Failed to Create Item.', };
   }
-  revalidatePath(`/notebook/items/${list_id}`);
 }
 
 export async function createUser(prevState: UserState, formData: FormData) {
@@ -210,10 +211,9 @@ export async function createUserAndRedirectToLogin(prevState: UserState, formDat
       hashedPassword = await bcrypt.hash(password!, 10);
     }
 
-    let user : any = await getUser(email);
-    if(user)
-    {
-      return {message: `User with email ${email} already registered! Pick another email!`};
+    let user: any = await getUser(email);
+    if (user) {
+      return { message: `User with email ${email} already registered! Pick another email!` };
     }
     // Insert the user into the database
     await sql`
@@ -230,8 +230,8 @@ export async function createUserAndRedirectToLogin(prevState: UserState, formDat
 
 export async function favoriteList(prevState: FavoriteState, formData: FormData) {
   console.log('formData', formData);
-   // Validate the form data using zod (assuming CreateUser is a Zod schema)
-   const validatedFields = CreateFavorite.safeParse({
+  // Validate the form data using zod (assuming CreateUser is a Zod schema)
+  const validatedFields = CreateFavorite.safeParse({
     list_id: formData.get('list_id'),
     user_id: formData.get('user_id')
   });
@@ -248,12 +248,13 @@ export async function favoriteList(prevState: FavoriteState, formData: FormData)
   try {
     await sql`INSERT INTO favorites (user_id, list_id)
       VALUES (${user_id}, ${list_id})`;
+    revalidatePath('/notebook');
+    revalidatePath('/notebook/saved');
+    return { message: "Form submitted" }; // or some relevant message
   }
   catch (error) {
     return { message: 'Database Error: Failed to favorite list.', };
   }
-  revalidatePath('/notebook');
-  revalidatePath('/notebook/saved');
 }
 
 export async function unFavoriteList(user_id: string, list_id: string) {
@@ -262,7 +263,7 @@ export async function unFavoriteList(user_id: string, list_id: string) {
     //return { message: 'diddy', };
   }
   catch (error) {
-    return { message: 'Database Error: Failed to unfavorite list.', };
+    console.log('Database Error: Failed to unfavorite list.');
   }
   revalidatePath('/notebook');
   revalidatePath('/notebook/saved');
@@ -295,7 +296,7 @@ export async function updateList(id: string, prevState: State, formData: FormDat
       SET name = ${name}, description = ${description}
       WHERE id = ${id}
   `;
-    // return { message: "Form submitted" }; // or some relevant message
+    //return { message: "Form submitted" }; // or some relevant message
   }
   catch (error) {
     return { message: 'Database Error: Failed to Update List.', };
@@ -324,12 +325,13 @@ export async function updateItem(id: string, list_id: string, prevState: ItemSta
     await sql`UPDATE items
       SET name = ${name}, is_checked = ${is_checked}
       WHERE id = ${id}`;
-    //return { message: "Form submitted" }; // or some relevant message
+    revalidatePath(`/notebook/items/${list_id}`);
+    return { message: "Form submitted" }; // or some relevant message
   }
   catch (error) {
     return { message: 'Database Error: Failed to Update Item.', };
   }
-  revalidatePath(`/notebook/items/${list_id}`);
+
 }
 
 export async function checkItem(id: string, list_id: string) {
