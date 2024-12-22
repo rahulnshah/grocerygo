@@ -4,13 +4,14 @@ import { fetchItems, fetchListById } from '@/app/lib/data';
 import ToBuyItem from '../../../ui/other/ToBuyItem';
 import AddNewItem from '@/app/ui/other/AddNewItem';
 
-export default async function ItemsPage({ params }: { params: { list_id: string } }) {
-  const list = await fetchListById(params.list_id);
+export default async function ItemsPage({ params }: { params: Promise<{ list_id: string }>}) {
+  const a = await params;
+  const list = await fetchListById(a.list_id);
   if (!list) {
     notFound();
   }
 
-  const items = await fetchItems(params.list_id);
+  const items = await fetchItems(a.list_id);
 
   return (
     <div className="flex justify-between p-6">
@@ -22,7 +23,7 @@ export default async function ItemsPage({ params }: { params: { list_id: string 
         </div>
       </div>
       <div className="w-2/5">
-        <AddNewItem list_id={params.list_id} />
+        <AddNewItem list_id={a.list_id} />
       </div>
     </div>
   );

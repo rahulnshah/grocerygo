@@ -1,5 +1,6 @@
 import React from 'react';
 import FavIcon from '../list/FavIcon';
+import { auth } from '@/auth';
 import Link from 'next/link';
 import { fetchListData, isFavorited } from '@/app/lib/data';
 import { DeleteList } from '../notebook/DeleteList';
@@ -8,7 +9,11 @@ import { UpdateList } from '../notebook/UpdateList';
 const ListCard = async ({ title, description, list_id }: { title: string, description: string, list_id: string }) => {
   const { numItems, numCheckedItems } = await fetchListData(list_id);
   const is_favorited = await isFavorited(list_id);
-
+  const session = await auth();
+ 
+  if (!session?.user) return null;
+  //console.log("Session is " ,session);
+ 
   return (
     <div className="flex flex-col items-center p-4 rounded-lg shadow-lg bg-white mt-2">
       <Link href={`/notebook/items/${list_id}`} className="text-lg font-semibold">
@@ -22,7 +27,7 @@ const ListCard = async ({ title, description, list_id }: { title: string, descri
       </Link>
       <p className="text-xs text-gray-500 mt-1">{numCheckedItems} out of {numItems} completed</p>
       <div className="flex items-center mt-2 space-x-2">
-        <FavIcon isFavorited={is_favorited} list_id={list_id} />
+        <FavIcon isFavorited={is_favorited} list_id={list_id} user_id={session.user.id} />
         
         {/* Mail Icon */}
         <button className="p-2 text-orange-500 hover:bg-orange-100 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-300">

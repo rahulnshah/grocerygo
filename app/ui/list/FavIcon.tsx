@@ -1,28 +1,27 @@
-'use client';
-import { useState } from 'react';
+
 import { favoriteList, unFavoriteList } from '@/app/lib/actions';
 
-export default function FavIcon({ isFavorited, list_id }: { isFavorited: boolean, list_id: string }) {
-  const [isFav, setIsFav] = useState(isFavorited);
-  const favoriteListWithId = favoriteList.bind(null, list_id);
-  const unFavoriteListWithId = unFavoriteList.bind(null, list_id);
+export default function FavIcon({ isFavorited, user_id, list_id }: { isFavorited: boolean, user_id: string, list_id: string }) {
+  //const [isFav, setIsFav] = useState(isFavorited)
+  const favoriteListWithId = favoriteList.bind(null, user_id, list_id);
+  const unFavoriteListWithId = unFavoriteList.bind(null, user_id, list_id);
 
-  const handleFavSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    await favoriteListWithId();
-    setIsFav(true); // Update local state
-  };
+  // const handleFavSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   await favoriteListWithId();
+  //   setIsFav(true); // Update local state
+  // };
 
-  const handleUnFavSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    await unFavoriteListWithId();
-    setIsFav(false); // Update local state
-  };
+  // const handleUnFavSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   await unFavoriteListWithId();
+  //   setIsFav(false); // Update local state
+  // };
 
   return (
     <>
-      {isFav ? (
-        <form onSubmit={handleUnFavSubmit} className="inline-block">
+      {isFavorited ? (
+        <form action={favoriteListWithId} className="inline-block">
           <button type="submit" className="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -35,7 +34,7 @@ export default function FavIcon({ isFavorited, list_id }: { isFavorited: boolean
           </button>
         </form>
       ) : (
-        <form onSubmit={handleFavSubmit} className="inline-block">
+        <form action={unFavoriteListWithId} className="inline-block">
           <button type="submit" className="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500">
             <svg
               xmlns="http://www.w3.org/2000/svg"

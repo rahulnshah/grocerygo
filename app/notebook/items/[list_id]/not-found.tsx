@@ -1,10 +1,10 @@
 import Link from 'next/link';
-import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied';
- 
+import { FaceFrownIcon } from '@heroicons/react/24/solid';
+
 export default function NotFound() {
   return (
     <main className="flex h-full flex-col items-center justify-center gap-2">
-      <SentimentDissatisfiedIcon/>
+      <FaceFrownIcon className="h-16 w-16 text-gray-500" />
       <h2 className="text-xl font-semibold">404 Not Found</h2>
       <p>Could not find the requested list.</p>
       <Link

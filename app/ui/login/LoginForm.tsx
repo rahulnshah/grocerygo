@@ -4,7 +4,7 @@ import Navbar from '../home/NavBar';
 import Link from 'next/link';
 import { useActionState } from 'react';
 import { authenticate } from '../../lib/actions';
-function LoginPage() {
+function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,7 +36,7 @@ function LoginPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-black">Your password</label>
+            <label htmlFor="password" className="block text-sm font-medium text-black">Password</label>
             <input
               type={showPassword ? 'text' : 'password'}
               id="password"
@@ -74,4 +74,4 @@ function LoginPage() {
   );
 }
 
-export default LoginPage;
+export default LoginForm;

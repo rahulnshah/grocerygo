@@ -10,10 +10,7 @@ import bcrypt from "bcrypt";
 export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig,
     providers: [
-        GitHub({
-            clientId: process.env.AUTH_GITHUB_ID,
-            clientSecret: process.env.AUTH_GITHUB_SECRET,
-          }),
+        GitHub,
         Credentials({
             async authorize(credentials) {
                 const parsedCredentials = z.object({ email: z.string().email({ message: "Not an email" }), password: z.string().min(6, { message: "Password must be at least 6 characters long" }) })
@@ -58,7 +55,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     const result = await createUser({}, formData);
 
                     // Handle result of createUser, you can log or throw errors if needed
-                    if (result.errors) {
+                    if (result?.errors) {
                         console.log(result.errors);
                         throw new Error(result.message);
                     }

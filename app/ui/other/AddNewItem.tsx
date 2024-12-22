@@ -33,16 +33,16 @@ const AddNewItem = ({ list_id }: { list_id: string }) => {
             type="text"
             id="name"
             name="name"
-            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${state.errors?.name ? 'border-red-500' : 'border-gray-300'}`}
+            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${state?.errors?.name ? 'border-red-500' : 'border-gray-300'}`}
           />
-          {state.errors?.name && <p className="mt-1 text-sm text-red-500">{state.errors?.name[0]}</p>}
+          {state?.errors?.name && <p className="mt-1 text-sm text-red-500">{state?.errors?.name[0]}</p>}
         </div>
 
         <div className="flex items-center mb-4">
           <input type="checkbox" name="is_checked" id="is_checked" className="mr-2" />
           <label htmlFor="is_checked" className="text-sm text-gray-700">Checked</label>
         </div>
-        {state.errors?.is_checked && <p className="mt-1 text-sm text-red-500">{state.errors?.is_checked[0]}</p>}
+        {state?.errors?.is_checked && <p className="mt-1 text-sm text-red-500">{state?.errors?.is_checked[0]}</p>}
 
         <button
           type="submit"

@@ -1,4 +1,3 @@
-'use client'
 import React from 'react';
 import { DeleteItem } from '../item/DeleteItem';
 import EditItemForm from '../item/EditItemForm';

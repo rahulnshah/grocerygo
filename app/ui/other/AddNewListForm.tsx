@@ -27,9 +27,9 @@ const AddNewListForm = () => {
             type="text"
             id="name"
             name="name"
-            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${state.errors?.name ? 'border-red-500' : 'border-gray-300'}`}
+            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${state?.errors?.name ? 'border-red-500' : 'border-gray-300'}`}
           />
-          {state.errors?.name && <p className="mt-1 text-sm text-red-500">{state.errors?.name[0]}</p>}
+          {state?.errors?.name && <p className="mt-1 text-sm text-red-500">{state?.errors?.name[0]}</p>}
         </div>
 
         <div className="mb-4">
@@ -38,9 +38,9 @@ const AddNewListForm = () => {
             id="description"
             name="description"
             rows={4}
-            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${state.errors?.description ? 'border-red-500' : 'border-gray-300'}`}
+            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${state?.errors?.description ? 'border-red-500' : 'border-gray-300'}`}
           />
-          {state.errors?.description && <p className="mt-1 text-sm text-red-500">{state.errors?.description[0]}</p>}
+          {state?.errors?.description && <p className="mt-1 text-sm text-red-500">{state?.errors?.description[0]}</p>}
         </div>
 
         <button

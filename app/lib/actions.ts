@@ -99,7 +99,7 @@ export async function createList(user_id: string, prevState: State, formData: Fo
         INSERT INTO lists (user_id, name, description)
         VALUES (${user_id}, ${name}, ${description})
       `;
-    return { message: "Form submitted" }; // or some relevant message
+    // return { message: "Form submitted" }; // or some relevant message
   }
   catch (error) {
     return { message: 'Database Error: Failed to Create List.', };
@@ -127,7 +127,7 @@ export async function createItem(list_id: string, prevState: ItemState, formData
   try {
     await sql`INSERT INTO items (name, list_id, is_checked)
       VALUES (${name}, ${list_id}, ${is_checked})`;
-    return { message: "Form submitted" }; // or some relevant message
+    //return { message: "Form submitted" }; // or some relevant message
   }
   catch (error) {
     return { message: 'Database Error: Failed to Create Item.', };
@@ -162,7 +162,7 @@ export async function createUser(prevState: UserState, formData: FormData) {
     // Insert the user into the database
     await sql`INSERT INTO users (name, email, password)
       VALUES (${name}, ${email}, ${hashedPassword})`;
-    return { message: "Form submitted" }; // or some relevant message
+    //return { message: "Form submitted" }; // or some relevant message
   }
   catch (error) {
     return { message: 'Database Error: Failed to Create User.', };
@@ -224,9 +224,10 @@ export async function favoriteList(user_id: string, list_id: string) {
   revalidatePath('/notebook/saved');
 }
 
-export async function unFavoriteList(list_id: string) {
+export async function unFavoriteList(user_id: string, list_id: string) {
   try {
-    await sql`DELETE FROM favorites WHERE list_id = ${list_id}`;
+    await sql`DELETE FROM favorites WHERE list_id = ${list_id} AND user_id = ${user_id}`;
+    return { message: 'Database Error: Failed to unfavorite list.', };
   }
   catch (error) {
     return { message: 'Database Error: Failed to unfavorite list.', };
@@ -292,7 +293,7 @@ export async function updateItem(id: string, list_id: string, prevState: ItemSta
     await sql`UPDATE items
       SET name = ${name}, is_checked = ${is_checked}
       WHERE id = ${id}`;
-    return { message: "Form submitted" }; // or some relevant message
+    //return { message: "Form submitted" }; // or some relevant message
   }
   catch (error) {
     return { message: 'Database Error: Failed to Update Item.', };
@@ -318,24 +319,24 @@ export async function deleteList(id: string) {
   // throw new Error('Failed to Delete Invoice');
   try {
     await sql`DELETE FROM lists WHERE id = ${id}`;
-    revalidatePath('/notebook');
-    revalidatePath('/notebook/saved');
-    return { message: 'Deleted List.' };
+    //return { message: 'Deleted List.' };
   }
   catch (error) {
     return { message: 'Database Error: Failed to Delete List.', };
   }
+  revalidatePath('/notebook');
+  revalidatePath('/notebook/saved');
 }
 
 export async function deleteItem(id: string, list_id: string) {
   try {
     await sql`DELETE FROM items WHERE id = ${id}`;
-    revalidatePath(`/notebook/items/${list_id}`);
-    return { message: 'Deleted Item.' };
+    //return { message: 'Deleted Item.' };
   }
   catch (error) {
     return { message: 'Database Error: Failed to Delete Item.' };
   }
+  revalidatePath(`/notebook/items/${list_id}`);
 }
 
 export async function authenticate(
