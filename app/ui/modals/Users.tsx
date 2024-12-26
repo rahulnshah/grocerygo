@@ -1,14 +1,16 @@
+import { searchUsers } from "@/app/lib/data";
 import ShareButton from "./ShareButton";
 import UnshareButton from "./UnshareButton";
 
-export default function Users({ searchQuery, sharedIds }: { searchQuery: string, sharedIds: Set<string> }) {
-    
+export default async function Users({ listId, searchQuery, sharedIds }: { listId: string, searchQuery: string, sharedIds: Set<string> }) {
+    const users = await searchUsers(searchQuery);
     return (
-        {searchQuery.length >= 2 && users.map((user) => (
+        <>
+        {searchQuery.length >= 2 && users?.users?.map((user) => (
             <div key={user.id} className="flex items-center justify-between p-2">
               <div className="flex items-center gap-2">
                 <img
-                  src={user.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`}
+                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`}
                   alt={user.name}
                   className="w-8 h-8 rounded-full"
                 />
@@ -22,13 +24,8 @@ export default function Users({ searchQuery, sharedIds }: { searchQuery: string,
               ) : (
                 <ShareButton listId={listId} userId={user.id} />
               )}
-              <button
-                onClick={() => handleShare(user.id)}
-                className="text-orange-500 hover:text-orange-600"
-              >
-                Share
-              </button>
             </div>
           ))}
-    )
+        </>
+    );
 }

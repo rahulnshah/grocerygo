@@ -10,6 +10,31 @@ import {
 
 import { unstable_noStore as noStore } from 'next/cache';
 
+export async function searchUsers(query: string) {
+  noStore();
+  if (!query || query.length < 2) {
+    return { users: [] };
+  }
+
+  try {
+    const result = await sql<User>`
+      SELECT *
+      FROM users
+      WHERE name ILIKE ${`%${query}%`} OR email ILIKE ${`%${query}%`}
+    `;
+    console.log('Result:', result.rows);
+    // const fuse = new Fuse(result.rows, {
+    //   keys: ['name', 'email']
+    // });
+
+    // const searchResults = fuse.search(query).map(result => result.item);
+    return { users: result.rows };
+  } catch (error) {
+    console.log(error);
+    return { users: [], error: 'Failed to search users' };
+  }
+}
+
 export async function getListSharedUsers(list_id: string, owner_id: string) {
   try {
     const result = await sql`

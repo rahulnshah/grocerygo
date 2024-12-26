@@ -2,6 +2,7 @@ import Search from './Search';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import Users from './Users';
 import { getListSharedUsers } from '@/app/lib/data';
+import UnshareButton from './UnshareButton';
 interface SharedUser {
   id: string;
   name: string;
@@ -32,7 +33,7 @@ const ShareModal: React.FC<ShareModalProps> = async ({ listId, ownerId, searchPa
             </div> */}
 
         <Search placeholder="Search for a user" />
-        <Users searchQuery={query} sharedIds={sharedIds}/>
+        <Users listId={listId} searchQuery={query} sharedIds={sharedIds}/>
         <div className="space-y-2">
           {sharedUsers?.users?.length > 0 && (
             <div className="mt-4">
@@ -53,12 +54,7 @@ const ShareModal: React.FC<ShareModalProps> = async ({ listId, ownerId, searchPa
                         <p className="text-sm text-gray-500">{user.email}</p>
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleUnshare(user.id)}
-                      className="text-red-500 hover:text-red-600 text-sm"
-                    >
-                      Remove
-                    </button>
+                    <UnshareButton listId={listId} userId={user.id} />
                   </div>
                 ))}
               </div>
