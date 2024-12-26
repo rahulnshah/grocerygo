@@ -95,6 +95,50 @@ const CreateItem = ItemFormSchema.omit({ id: true, list_id: true, created_at: tr
 const CreateUser = UserFormSchema.omit({ id: true, created_at: true })
 const CreateFavorite = FavoriteFormSchema.omit({ id: true, created_at: true });
 
+
+export async function shareList(listId: string, formData: FormData) {
+  const userId = formData.get('userId');
+  if (!userId || typeof userId !== 'string') {
+    throw new Error('Invalid user ID');
+  }
+
+  try {
+    await sql`
+      INSERT INTO shared_lists (owner_id, shared_with_id, list_id, shared_at)
+      VALUES (
+        (SELECT owner_id FROM lists WHERE id = ${listId}),
+        ${userId},
+        ${listId},
+        NOW()
+      )
+      ON CONFLICT (list_id, shared_with_id) DO NOTHING
+    `;
+    revalidatePath(`/notebook/lists/share-modal/${listId}`);
+    revalidatePath('/notebook/shared');
+  } catch (error) {
+    throw new Error('Failed to share list');
+  }
+}
+
+export async function unshareList(listId: string, formData: FormData) {
+  const userId = formData.get('userId');
+  if (!userId || typeof userId !== 'string') {
+    throw new Error('Invalid user ID');
+  }
+
+  try {
+    await sql`
+      DELETE FROM shared_lists
+      WHERE list_id = ${listId}
+      AND shared_with_id = ${userId}
+    `;
+    revalidatePath(`/notebook/lists/share-modal/${listId}`);
+    revalidatePath('/notebook/shared');
+  } catch (error) {
+    throw new Error('Failed to unshare list');
+  }
+}
+
 export async function createList(user_id: string, prevState: State, formData: FormData) {
   const validatedFields = CreateList.safeParse({
     name: formData.get('name'),
