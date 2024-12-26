@@ -10,6 +10,20 @@ import {
 
 import { unstable_noStore as noStore } from 'next/cache';
 
+export async function getListSharedUsers(listId: string) {
+  try {
+    const result = await sql`
+      SELECT u.id, u.name, u.email, sl.shared_at
+      FROM shared_lists sl
+      JOIN users u ON sl.shared_with_id = u.id
+      WHERE sl.list_id = ${listId}
+      ORDER BY sl.shared_at DESC
+    `;
+    return { users: result.rows };
+  } catch (error) {
+    return { users: [], error: 'Failed to fetch shared users' };
+  }
+}
 export async function fetchList(user_id: string) {
   // Add noStore() here prevent the response from being cached.
   // This is equivalent to in fetch(..., {cache: 'no-store'}).
