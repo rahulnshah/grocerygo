@@ -4,7 +4,6 @@ import { useSearchParams } from 'next/navigation';
 
 export default function Search({ placeholder }: { placeholder: string }) {
     const searchParams = useSearchParams();
-
     function handleSearch(term: string) {
         const params = new URLSearchParams(searchParams);
         if (term) {

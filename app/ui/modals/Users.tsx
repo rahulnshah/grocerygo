@@ -1,4 +1,4 @@
-export default function Users({ searchQuery }: { searchQuery: string }) {
+export default function Users({ searchQuery, sharedIds }: { searchQuery: string, sharedIds: Set<string> }) {
     
     return (
         {searchQuery.length >= 2 && users.map((user) => (

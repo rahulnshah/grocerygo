@@ -10,13 +10,13 @@ import {
 
 import { unstable_noStore as noStore } from 'next/cache';
 
-export async function getListSharedUsers(listId: string) {
+export async function getListSharedUsers(list_id: string, owner_id: string) {
   try {
     const result = await sql`
-      SELECT u.id, u.name, u.email, sl.shared_at
+      SELECT u.id, u.name, u.email, s1.shared_at
       FROM shared_lists sl
       JOIN users u ON sl.shared_with_id = u.id
-      WHERE sl.list_id = ${listId}
+      WHERE sl.list_id = ${list_id} AND sl.owner_id = ${owner_id}
       ORDER BY sl.shared_at DESC
     `;
     return { users: result.rows };
