@@ -1,3 +1,6 @@
+import ShareButton from "./ShareButton";
+import UnshareButton from "./UnshareButton";
+
 export default function Users({ searchQuery, sharedIds }: { searchQuery: string, sharedIds: Set<string> }) {
     
     return (
@@ -14,6 +17,11 @@ export default function Users({ searchQuery, sharedIds }: { searchQuery: string,
                   <p className="text-sm text-gray-500">{user.email}</p>
                 </div>
               </div>
+              {sharedIds.has(user.id) ? (
+                <UnshareButton listId={listId} userId={user.id} />
+              ) : (
+                <ShareButton listId={listId} userId={user.id} />
+              )}
               <button
                 onClick={() => handleShare(user.id)}
                 className="text-orange-500 hover:text-orange-600"
