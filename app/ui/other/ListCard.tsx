@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { fetchListData, isFavorited } from '@/app/lib/data';
 import { DeleteList } from '../notebook/DeleteList';
 import { UpdateList } from '../notebook/UpdateList';
+import { ShareList } from '../notebook/ShareList';
 
 const ListCard = async ({ title, description, list_id }: { title: string, description: string, list_id: string }) => {
   const { numItems, numCheckedItems } = await fetchListData(list_id);
@@ -37,11 +38,7 @@ const ListCard = async ({ title, description, list_id }: { title: string, descri
         </button>
 
         {/* Share Icon */}
-        <button className="p-2 text-orange-500 hover:bg-orange-100 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-300">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 8l4 4m0 0l-4 4m4-4H3" />
-          </svg>
-        </button>
+        <ShareList id={list_id} />
 
         {/* Update List Button */}
         <UpdateList id={list_id} />
