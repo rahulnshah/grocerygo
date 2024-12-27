@@ -8,9 +8,9 @@ export function DeleteItem({ id, list_id }: { id: string; list_id: string }) {
     <form action={deleteItemWithId} className="inline">
       <button
         type="submit"
-        className="p-2 rounded-full hover:bg-gray-200 transition-colors"
+        className="p-2 rounded-full text-gray-600 hover:text-red-500 hover:bg-gray-100 transition-colors"
       >
-        <TrashIcon className="h-6 w-6 text-[#ED9121]" />
+        <TrashIcon className="h-5 w-5" />
       </button>
     </form>
   );

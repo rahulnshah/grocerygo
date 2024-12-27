@@ -6,7 +6,8 @@ import {
   List,
   ListForm,
   ItemForm,
-  User
+  User,
+  SharedList
 } from './definitions';
 
 import { unstable_noStore as noStore } from 'next/cache';
@@ -33,6 +34,19 @@ export async function searchUsers(query: string, ownerId: string) {
   } catch (error) {
     console.log(error);
     return { users: [], error: 'Failed to search users' };
+  }
+}
+
+export async function fetchSharedLists(owner_id: string) {
+  noStore();
+  try {
+    const data = await sql<List>`SELECT lists.id, lists.name, lists.description FROM shared_lists
+      JOIN lists ON shared_lists.list_id = lists.id
+      WHERE shared_with_id = ${owner_id} LIMIT 20`;
+    return data.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch lists.');
   }
 }
 

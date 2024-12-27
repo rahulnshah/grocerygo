@@ -12,11 +12,11 @@ export default async function ItemsPage({ params }: { params: Promise<{ list_id:
   }
 
   const items = await fetchItems(a.list_id);
-
+  // 
   return (
     <div className="flex justify-between p-6">
       <div className="w-3/5">
-        <div className="grid grid-cols-4 gap-4 w-1/2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6">
           {items.map((item) => (
             <ToBuyItem key={item.id} item={item} />
           ))}
