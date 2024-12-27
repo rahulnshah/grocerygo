@@ -76,7 +76,7 @@ export async function fetchItems(list_id: string) {
   }
 }
 
-export async function fetchFavoriteLists() {
+export async function fetchFavoriteLists(owner_id: string) {
   noStore();
   try {
     const data = await sql<FavoriteList>`
@@ -91,6 +91,8 @@ export async function fetchFavoriteLists() {
         lists ON favorites.list_id = lists.id
       JOIN
         users on favorites.user_id = users.id
+      WHERE
+        favorites.user_id = ${owner_id}
       LIMIT 6`;
 
     return data.rows;

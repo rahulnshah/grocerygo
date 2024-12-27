@@ -410,7 +410,7 @@ export async function deleteItem(id: string, list_id: string) {
     //return { message: 'Deleted Item.' };
   }
   catch (error) {
-    return { message: 'Database Error: Failed to Delete Item.' };
+    console.log('Database Error: Failed to Delete Item.');
   }
   revalidatePath(`/notebook/items/${list_id}`);
 }
