@@ -57,4 +57,11 @@ export type User = {
     password?: string;
     created_at: string;
 };
+
+export type SharedList = {
+    id: string;
+    list_id: string;
+    shared_with_id: string;
+    created_at: string;
+};
   

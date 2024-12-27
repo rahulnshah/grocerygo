@@ -23,7 +23,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     const passwordsMatch = await bcrypt.compare(password, user.password!);
 
                     if (passwordsMatch) {
-                        console.log('Credentials are valid', user);
+                       // console.log('Credentials are valid', user);
                         return{
                             id: user.id,
                             name: user.name,
@@ -32,14 +32,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         };
                     }
                 }
-                console.log('Invalid credentials');
+                //console.log('Invalid credentials');
                 return null;
             },
         })],
     callbacks: {
         async jwt({ token, user}) {
-            console.log('jwt callback - trying to access email');
-            console.log("Inside jwt call back" , user);
+            //console.log('jwt callback - trying to access email');
+            //console.log("Inside jwt call back" , user);
             if (user && user.email && user.name) {
                 const email = user.email;
                 // Check if a user with this email already exists
@@ -70,13 +70,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     created_at: existingUser.created_at,
                 };
             }
-            else {
-                console.log('User object does not have an email property');
-            }
             return token;
         },
         async session({ session, token, user }) {
-            console.log('session callback - trying to access email', token);
+            //console.log('session callback - trying to access email', token);
             return {
                 ...session,
                 user: {

@@ -1,3 +1,4 @@
+'use server';
 import { sql } from '@vercel/postgres';
 import {
   Item,
@@ -5,11 +6,64 @@ import {
   List,
   ListForm,
   ItemForm,
-  User
+  User,
+  SharedList
 } from './definitions';
 
 import { unstable_noStore as noStore } from 'next/cache';
 
+export async function searchUsers(query: string, ownerId: string) {
+  noStore();
+  if (!query || query.length < 2) {
+    return { users: [] };
+  }
+
+  try {
+    const result = await sql<User>`
+      SELECT *
+      FROM users
+      WHERE (name ILIKE ${`%${query}%`} OR email ILIKE ${`%${query}%`}) AND id != ${ownerId}
+    `;
+    console.log('Result:', result.rows);
+    // const fuse = new Fuse(result.rows, {
+    //   keys: ['name', 'email']
+    // });
+
+    // const searchResults = fuse.search(query).map(result => result.item);
+    return { users: result.rows };
+  } catch (error) {
+    console.log(error);
+    return { users: [], error: 'Failed to search users' };
+  }
+}
+
+export async function fetchSharedLists(owner_id: string) {
+  noStore();
+  try {
+    const data = await sql<List>`SELECT lists.id, lists.name, lists.description FROM shared_lists
+      JOIN lists ON shared_lists.list_id = lists.id
+      WHERE shared_with_id = ${owner_id} LIMIT 20`;
+    return data.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch lists.');
+  }
+}
+
+export async function getListSharedUsers(list_id: string, owner_id: string) {
+  try {
+    const result = await sql`
+      SELECT u.id, u.name, u.email, sl.shared_at
+      FROM shared_lists sl
+      JOIN users u ON sl.shared_with_id = u.id
+      WHERE sl.list_id = ${list_id} AND sl.owner_id = ${owner_id}
+      ORDER BY sl.shared_at DESC;
+    `;
+    return { users: result.rows };
+  } catch (error) {
+    return { users: [], error: 'Failed to fetch shared users' };
+  }
+}
 export async function fetchList(user_id: string) {
   // Add noStore() here prevent the response from being cached.
   // This is equivalent to in fetch(..., {cache: 'no-store'}).
@@ -36,7 +90,7 @@ export async function fetchItems(list_id: string) {
   }
 }
 
-export async function fetchFavoriteLists() {
+export async function fetchFavoriteLists(owner_id: string) {
   noStore();
   try {
     const data = await sql<FavoriteList>`
@@ -51,6 +105,8 @@ export async function fetchFavoriteLists() {
         lists ON favorites.list_id = lists.id
       JOIN
         users on favorites.user_id = users.id
+      WHERE
+        favorites.user_id = ${owner_id}
       LIMIT 6`;
 
     return data.rows;

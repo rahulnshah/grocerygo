@@ -14,18 +14,15 @@ const EditItemForm = ({ item }: { item: ItemForm }) => {
   const [state, formAction] = useActionState(updateItemWithId, initialState);
 
   return (
-    <form action={formAction} className="flex flex-col space-y-4">
-      <div className="flex flex-col">
-        <label htmlFor="name" className="mb-1 text-sm font-medium text-gray-700">
-          Title
-        </label>
+    <form action={formAction} className="flex flex-col space-y-4 max-w-xs mx-4 mt-4">
+      <div className="flex flex-col rounded-lg bg-white relative">
         <input
           type="text"
           name="name"
           id="name"
           defaultValue={item.name}
           placeholder="Enter name"
-          className={`p-2 border rounded-md focus:outline-none focus:ring-2 ${
+          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
             state?.errors?.name ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
           }`}
         />
@@ -50,7 +47,8 @@ const EditItemForm = ({ item }: { item: ItemForm }) => {
       )}
       <button
         type="submit"
-        className="flex items-center p-2 text-orange-500 border border-orange-500 rounded hover:bg-orange-100"
+        className={`w-24 flex items-center justify-center p-2 border rounded hover:bg-orange-100 
+          ${item.is_checked ? 'text-white border-white hover:text-orange-500' : 'text-orange-500 border-orange-500'}`}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
