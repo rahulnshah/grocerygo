@@ -1,9 +1,11 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 export default function Search({ placeholder }: { placeholder: string }) {
     const searchParams = useSearchParams();
+    const pathname = usePathname();
+    const { replace } = useRouter();
     function handleSearch(term: string) {
         const params = new URLSearchParams(searchParams);
         if (term) {
@@ -11,12 +13,13 @@ export default function Search({ placeholder }: { placeholder: string }) {
         } else {
             params.delete('query');
         }
+        replace(`${pathname}?${params.toString()}`);
     }
     return (
         <div className="mb-4">
-            <label htmlFor="search" className="sr-only">
+            {/* <label htmlFor="search" className="sr-only">
                 Search
-            </label>
+            </label> */}
             <input
                 type="text"
                 placeholder={placeholder}

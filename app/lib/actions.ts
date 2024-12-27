@@ -97,7 +97,7 @@ const CreateFavorite = FavoriteFormSchema.omit({ id: true, created_at: true });
 
 
 export async function shareList(listId: string, formData: FormData) {
-  const userId = formData.get('userId');
+  const userId = formData.get('user_id');
   if (!userId || typeof userId !== 'string') {
     throw new Error('Invalid user ID');
   }
@@ -106,7 +106,7 @@ export async function shareList(listId: string, formData: FormData) {
     await sql`
       INSERT INTO shared_lists (owner_id, shared_with_id, list_id, shared_at)
       VALUES (
-        (SELECT owner_id FROM lists WHERE id = ${listId}),
+        (SELECT user_id FROM lists WHERE id = ${listId}),
         ${userId},
         ${listId},
         NOW()
@@ -116,12 +116,13 @@ export async function shareList(listId: string, formData: FormData) {
     revalidatePath(`/notebook/lists/share-modal/${listId}`);
     revalidatePath('/notebook/shared');
   } catch (error) {
+    console.log("error", error);
     throw new Error('Failed to share list');
   }
 }
 
 export async function unshareList(listId: string, formData: FormData) {
-  const userId = formData.get('userId');
+  const userId = formData.get('user_id');
   if (!userId || typeof userId !== 'string') {
     throw new Error('Invalid user ID');
   }
@@ -314,7 +315,7 @@ export async function unFavoriteList(user_id: string, list_id: string) {
 }
 
 // Use Zod to update the expected types
-const UpdateList = ListFormSchema.omit({ id: true, created_at: true, updated_at: true });
+const UpdateList = ListFormSchema.omit({ id: true, user_id: true, created_at: true, updated_at: true });
 const UpdateItem = ItemFormSchema.omit({ id: true, list_id: true, created_at: true, updated_at: true });
 
 export async function updateList(id: string, prevState: State, formData: FormData) {
@@ -337,14 +338,13 @@ export async function updateList(id: string, prevState: State, formData: FormDat
   try {
     await sql`
     UPDATE lists
-      SET name = ${name}, description = ${description}
-      WHERE id = ${id}
-  `;
+    SET name = ${name}, description = ${description} WHERE id = ${id}`;
     //return { message: "Form submitted" }; // or some relevant message
   }
   catch (error) {
     return { message: 'Database Error: Failed to Update List.', };
   }
+  revalidatePath('/notebook');
   redirect('/notebook');
 }
 
@@ -398,7 +398,7 @@ export async function deleteList(id: string) {
     //return { message: 'Deleted List.' };
   }
   catch (error) {
-    return { message: 'Database Error: Failed to Delete List.', };
+    console.log('Database Error: Failed to Delete List.');
   }
   revalidatePath('/notebook');
   revalidatePath('/notebook/saved');

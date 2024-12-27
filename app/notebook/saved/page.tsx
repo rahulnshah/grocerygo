@@ -5,7 +5,7 @@ import ListCard from '@/app/ui/other/ListCard';
 const SavedPage = async () => {
   const lists = await fetchFavoriteLists();
   return (
-    <div className="grid grid-cols-4 gap-4 w-1/2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6">
       {lists.map((list) => (
         <ListCard
           key={list.id}

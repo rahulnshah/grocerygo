@@ -6,47 +6,45 @@ import { fetchListData, isFavorited } from '@/app/lib/data';
 import { DeleteList } from '../notebook/DeleteList';
 import { UpdateList } from '../notebook/UpdateList';
 import { ShareList } from '../notebook/ShareList';
+import { MailList } from '../notebook/MailList';
+interface ListCardProps {
+  title: string;
+  description: string;
+  list_id: string;
+  owner_name?: string;
+}
 
-const ListCard = async ({ title, description, list_id }: { title: string, description: string, list_id: string }) => {
+const ListCard = async ({ title, description, list_id }: ListCardProps) => {
   const { numItems, numCheckedItems } = await fetchListData(list_id);
-  const is_favorited : boolean = await isFavorited(list_id);
+  const is_favorited: boolean = await isFavorited(list_id);
   const session = await auth();
- 
+
   if (!session?.user) return null;
   //console.log("Session is " ,session);
- 
+
   return (
-    <div className="flex flex-col items-center p-4 rounded-lg shadow-lg bg-white mt-2">
-      <Link href={`/notebook/items/${list_id}`} className="text-lg font-semibold">
-        <h3>{title}</h3>
-        <p className="text-sm text-gray-600">{description}</p>
-        <div className="flex items-center mt-2">
-          <img src="path/to/avatar1.jpg" alt="Avatar 1" className="w-6 h-6 rounded-full" />
-          <img src="path/to/avatar2.jpg" alt="Avatar 2" className="w-6 h-6 rounded-full -ml-2" />
-          <div className="ml-2 text-sm text-gray-500">2</div>
+    <div className="w-full bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
+      <div className="p-4">
+        <Link href={`/notebook/items/${list_id}`} className="text-lg font-semibold block">
+          <h3 className="truncate">{title}</h3>
+          <p className="text-sm text-gray-600 truncate">{description}</p>
+          <div className="flex items-center mt-2">
+            <img src="path/to/avatar1.jpg" alt="Avatar 1" className="w-6 h-6 rounded-full" />
+            <img src="path/to/avatar2.jpg" alt="Avatar 2" className="w-6 h-6 rounded-full -ml-2" />
+            <div className="ml-2 text-sm text-gray-500">2</div>
+          </div>
+        </Link>
+        <p className="text-xs text-gray-500 mt-1">{numCheckedItems} out of {numItems} completed</p>
+        <div className="flex justify-between items-center mt-auto space-x-1">
+          <FavIcon isFavorited={is_favorited} list_id={list_id} user_id={session.user.id} />
+          <MailList id={list_id} />
+          <ShareList id={list_id} />
+          <UpdateList id={list_id} />
+          <DeleteList id={list_id} />
         </div>
-      </Link>
-      <p className="text-xs text-gray-500 mt-1">{numCheckedItems} out of {numItems} completed</p>
-      <div className="flex items-center mt-2 space-x-2">
-        <FavIcon isFavorited={is_favorited} list_id={list_id} user_id={session.user.id} />
-        
-        {/* Mail Icon */}
-        <button className="p-2 text-orange-500 hover:bg-orange-100 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-300">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6l9 6 9-6M4 18l8-5 8 5" />
-          </svg>
-        </button>
-
-        {/* Share Icon */}
-        <ShareList id={list_id} />
-
-        {/* Update List Button */}
-        <UpdateList id={list_id} />
-        
-        {/* Delete List Button */}
-        <DeleteList id={list_id} />
       </div>
     </div>
+
   );
 };
 

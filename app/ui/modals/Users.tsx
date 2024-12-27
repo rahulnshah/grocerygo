@@ -2,8 +2,9 @@ import { searchUsers } from "@/app/lib/data";
 import ShareButton from "./ShareButton";
 import UnshareButton from "./UnshareButton";
 
-export default async function Users({ listId, searchQuery, sharedIds }: { listId: string, searchQuery: string, sharedIds: Set<string> }) {
-    const users = await searchUsers(searchQuery);
+export default async function Users({ listId, ownerId, searchQuery, sharedIds }: { listId: string, ownerId: string, searchQuery: string, sharedIds: Set<string> }) {
+    const users = await searchUsers(searchQuery, ownerId);
+    console.log("searched users", users.users);
     return (
         <>
         {searchQuery.length >= 2 && users?.users?.map((user) => (

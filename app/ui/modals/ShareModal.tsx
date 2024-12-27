@@ -13,15 +13,15 @@ interface SharedUser {
 interface ShareModalProps {
   listId: string;
   ownerId: string;
-  searchParams?: Promise<{ query?: string }>;
+  searchParams?: string;
 }
 
 const ShareModal: React.FC<ShareModalProps> = async ({ listId, ownerId, searchParams }) => {
-  const sParams = await searchParams;
-  const query = sParams?.query || '';
-
+  const query = searchParams || '';
+  console.log("query", query);
   const sharedUsers = await getListSharedUsers(listId, ownerId) as { users: SharedUser[] };
   const sharedIds = new Set<string>(sharedUsers.users.map(user => user.id));
+  console.log("sharedIds", sharedIds);
   return (
     <div className="bg-white rounded-lg shadow-xl">
       <div className="p-4">
@@ -33,7 +33,7 @@ const ShareModal: React.FC<ShareModalProps> = async ({ listId, ownerId, searchPa
             </div> */}
 
         <Search placeholder="Search for a user" />
-        <Users listId={listId} searchQuery={query} sharedIds={sharedIds}/>
+        <Users listId={listId} ownerId={ownerId} searchQuery={query} sharedIds={sharedIds}/>
         <div className="space-y-2">
           {sharedUsers?.users?.length > 0 && (
             <div className="mt-4">

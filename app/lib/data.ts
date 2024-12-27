@@ -1,3 +1,4 @@
+'use server';
 import { sql } from '@vercel/postgres';
 import {
   Item,
@@ -10,7 +11,7 @@ import {
 
 import { unstable_noStore as noStore } from 'next/cache';
 
-export async function searchUsers(query: string) {
+export async function searchUsers(query: string, ownerId: string) {
   noStore();
   if (!query || query.length < 2) {
     return { users: [] };
@@ -20,7 +21,7 @@ export async function searchUsers(query: string) {
     const result = await sql<User>`
       SELECT *
       FROM users
-      WHERE name ILIKE ${`%${query}%`} OR email ILIKE ${`%${query}%`}
+      WHERE (name ILIKE ${`%${query}%`} OR email ILIKE ${`%${query}%`}) AND id != ${ownerId}
     `;
     console.log('Result:', result.rows);
     // const fuse = new Fuse(result.rows, {
@@ -38,11 +39,11 @@ export async function searchUsers(query: string) {
 export async function getListSharedUsers(list_id: string, owner_id: string) {
   try {
     const result = await sql`
-      SELECT u.id, u.name, u.email, s1.shared_at
+      SELECT u.id, u.name, u.email, sl.shared_at
       FROM shared_lists sl
       JOIN users u ON sl.shared_with_id = u.id
       WHERE sl.list_id = ${list_id} AND sl.owner_id = ${owner_id}
-      ORDER BY sl.shared_at DESC
+      ORDER BY sl.shared_at DESC;
     `;
     return { users: result.rows };
   } catch (error) {
