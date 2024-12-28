@@ -38,6 +38,8 @@ const ItemFormSchema = z.object({
   is_checked: z.boolean({
     invalid_type_error: 'Please specify if item is checked or not.',
   }),
+  assigned_to: z.string(),
+  assigned_to_name: z.string().optional(),
   created_at: z.string(),
   updated_at: z.string()
 });
@@ -69,6 +71,7 @@ export type ItemState = {
   errors?: {
     name?: string[];
     is_checked?: string[];
+    assigned_to?: string[];
   };
   message?: string | null;
 };
@@ -173,7 +176,8 @@ export async function createList(user_id: string, prevState: State, formData: Fo
 export async function createItem(list_id: string, prevState: ItemState, formData: FormData) {
   const validatedFields = CreateItem.safeParse({
     name: formData.get('name'),
-    is_checked: formData.get('is_checked') === 'on' ? true : false
+    is_checked: formData.get('is_checked') === 'on' ? true : false,
+    assigned_to: formData.get('assigned_to')
   });
 
   // If form validation fails, return errors early. Otherwise, continue.
@@ -185,10 +189,10 @@ export async function createItem(list_id: string, prevState: ItemState, formData
   }
 
   // Prepare data for insertion into the database
-  const { name, is_checked } = validatedFields.data;
+  const { name, is_checked, assigned_to } = validatedFields.data;
   try {
-    await sql`INSERT INTO items (name, list_id, is_checked)
-      VALUES (${name}, ${list_id}, ${is_checked})`;
+    await sql`INSERT INTO items (name, list_id, is_checked, assigned_to)
+      VALUES (${name}, ${list_id}, ${is_checked}, ${assigned_to})`;
     revalidatePath(`/notebook/items/${list_id}`);
     return { message: "Form submitted" }; // or some relevant message
   }
@@ -351,7 +355,8 @@ export async function updateList(id: string, prevState: State, formData: FormDat
 export async function updateItem(id: string, list_id: string, prevState: ItemState, formData: FormData) {
   const validatedFields = UpdateItem.safeParse({
     name: formData.get('name'),
-    is_checked: formData.get('is_checked') === 'on' ? true : false
+    is_checked: formData.get('is_checked') === 'on' ? true : false,
+    assigned_to: formData.get('assigned_to')
   });
 
   // If form validation fails, return errors early. Otherwise, continue.
@@ -363,11 +368,11 @@ export async function updateItem(id: string, list_id: string, prevState: ItemSta
   }
 
   // Prepare data for insertion into the database
-  const { name, is_checked } = validatedFields.data;
+  const { name, is_checked, assigned_to } = validatedFields.data;
 
   try {
     await sql`UPDATE items
-      SET name = ${name}, is_checked = ${is_checked}
+      SET name = ${name}, is_checked = ${is_checked}, assigned_to = ${assigned_to}
       WHERE id = ${id}`;
     revalidatePath(`/notebook/items/${list_id}`);
     return { message: "Form submitted" }; // or some relevant message

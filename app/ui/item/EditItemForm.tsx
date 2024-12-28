@@ -1,14 +1,23 @@
 "use client";
-//import React, { useState } from "react";
 import { ItemState } from "@/app/lib/actions";
-import { ItemForm } from "@/app/lib/definitions";
+import { ItemForm, User } from "@/app/lib/definitions";
 import { updateItem } from "@/app/lib/actions";
 import { useActionState } from "react";
 
-const EditItemForm = ({ item }: { item: ItemForm }) => {
-  // const [name, setName] = useState(item.name);
-  // const [isChecked, setIsChecked] = useState(item.is_checked);
+interface U {
+  assigned_to_name: string;
+  assigned_to: string;
+}
 
+const EditItemForm = ({ 
+  item, 
+  listUsers,
+  currentUserId 
+}: { 
+  item: ItemForm;
+  listUsers: User[];
+  currentUserId: string;
+}) => {
   const initialState: ItemState = { errors: {}, message: null };
   const updateItemWithId = updateItem.bind(null, item.id, item.list_id);
   const [state, formAction] = useActionState(updateItemWithId, initialState);
@@ -30,6 +39,22 @@ const EditItemForm = ({ item }: { item: ItemForm }) => {
           <span className="text-sm text-red-500">{state?.errors?.name[0]}</span>
         )}
       </div>
+
+      <div className="flex flex-col">
+        <select
+          name="assigned_to"
+          defaultValue={item.assigned_to || currentUserId}
+          className="w-full px-3 py-2 border rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          {listUsers.map((user) => ((
+              <option key={user.id} value={user.id}>
+                {user.id === currentUserId ? 'You' : user.name}
+              </option>
+            )
+          ))}
+        </select>
+      </div>
+
       <div className="flex items-center">
         <input
           type="checkbox"
@@ -42,9 +67,7 @@ const EditItemForm = ({ item }: { item: ItemForm }) => {
           Checked
         </label>
       </div>
-      {state?.errors?.is_checked?.[0] && (
-        <span className="text-sm text-red-500">{state?.errors.is_checked[0]}</span>
-      )}
+
       <button
         type="submit"
         className={`w-24 flex items-center justify-center p-2 border rounded hover:bg-orange-100 

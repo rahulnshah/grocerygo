@@ -3,8 +3,9 @@ import React from 'react';
 import { createItem } from '@/app/lib/actions';
 import { ItemState } from '@/app/lib/actions';
 import { useActionState } from 'react';
-
-const AddNewItem = ({ list_id }: { list_id: string }) => {
+import { getListUsers } from '@/app/lib/data';
+import { User } from 'next-auth';
+const AddNewItem = ({ list_id, currentUserId, listUsers }: { list_id: string, currentUserId: string, listUsers: User[] }) => {
   const initialState: ItemState = { message: null, errors: {} };
   const createItemWithListId = createItem.bind(null, list_id);
   const [state, formAction] = useActionState(createItemWithListId, initialState);
@@ -37,6 +38,21 @@ const AddNewItem = ({ list_id }: { list_id: string }) => {
           />
           {state?.errors?.name && <p className="mt-1 text-sm text-red-500">{state?.errors?.name[0]}</p>}
         </div>
+
+        <div className="flex flex-col">
+        <select
+          name="assigned_to"
+          defaultValue={currentUserId}
+          className="w-full px-3 py-2 border rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          {listUsers.map((user) => ((
+              <option key={user.id} value={user.id}>
+                {user.id === currentUserId ? 'You' : user.name}
+              </option>
+            )
+          ))}
+        </select>
+      </div>
 
         <div className="flex items-center mb-4">
           <input type="checkbox" name="is_checked" id="is_checked" className="mr-2" />
