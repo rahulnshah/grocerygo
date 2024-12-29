@@ -2,7 +2,7 @@ import React from 'react';
 import FavIcon from '../list/FavIcon';
 import { auth } from '@/auth';
 import Link from 'next/link';
-import { fetchListData, isFavorited } from '@/app/lib/data';
+import { fetchListData, getListUsers, isFavorited } from '@/app/lib/data';
 import { DeleteList } from '../notebook/DeleteList';
 import { UpdateList } from '../notebook/UpdateList';
 import { ShareList } from '../notebook/ShareList';
@@ -17,14 +17,15 @@ interface ListCardProps {
 
 const ListCard = async ({ title, description, list_id, user_id }: ListCardProps) => {
   const { numItems, numCheckedItems } = await fetchListData(list_id);
+  const listUsers = await getListUsers(list_id);
   const is_favorited: boolean = await isFavorited(list_id);
   const session = await auth();
 
   if (!session?.user) return null;
   //console.log("Session is " ,session);
   const owner_id = session.user.id;
-  console.log("owner_id is ", owner_id);
-  console.log("user_id is ", user_id);
+  // console.log("owner_id is ", owner_id);
+  // console.log("user_id is ", user_id);
   const isOwner = owner_id === user_id;
   return (
     <div className="w-full bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
@@ -33,9 +34,13 @@ const ListCard = async ({ title, description, list_id, user_id }: ListCardProps)
           <h3 className="truncate">{title}</h3>
           <p className="text-sm text-gray-600 truncate">{description}</p>
           <div className="flex items-center mt-2">
-            <img src="path/to/avatar1.jpg" alt="Avatar 1" className="w-6 h-6 rounded-full" />
-            <img src="path/to/avatar2.jpg" alt="Avatar 2" className="w-6 h-6 rounded-full -ml-2" />
-            <div className="ml-2 text-sm text-gray-500">2</div>
+            {/* <img src="path/to/avatar1.jpg" alt="Avatar 1" className="w-6 h-6 rounded-full" />
+            <img src="path/to/avatar2.jpg" alt="Avatar 2" className="w-6 h-6 rounded-full -ml-2" /> */}
+            {listUsers.length > 1 && (
+              <div className="text-sm text-gray-500">
+                Shared with {listUsers.length} {isOwner && 'other'} users {!isOwner && 'including you'}
+              </div> 
+            )}
           </div>
         </Link>
         <p className="text-xs text-gray-500 mt-1">{numCheckedItems} out of {numItems} completed</p>
@@ -50,7 +55,7 @@ const ListCard = async ({ title, description, list_id, user_id }: ListCardProps)
             </>
           )}
           {!isOwner && (user_id &&
-              <CopyList listId={list_id} userId={user_id} />
+              <CopyList listId={list_id} userId={owner_id} />
             )}
         </div>
       </div>

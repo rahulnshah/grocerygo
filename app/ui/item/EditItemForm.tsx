@@ -21,7 +21,7 @@ const EditItemForm = ({
   const initialState: ItemState = { errors: {}, message: null };
   const updateItemWithId = updateItem.bind(null, item.id, item.list_id);
   const [state, formAction] = useActionState(updateItemWithId, initialState);
-
+  console.log("item is ", item);
   return (
     <form action={formAction} className="flex flex-col space-y-4 max-w-xs mx-4 mt-4">
       <div className="flex flex-col rounded-lg bg-white relative">
@@ -43,9 +43,12 @@ const EditItemForm = ({
       <div className="flex flex-col">
         <select
           name="assigned_to"
-          defaultValue={item.assigned_to || currentUserId}
+          defaultValue={item.assigned_to}
           className="w-full px-3 py-2 border rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
+          <option value="" disabled>
+                Select a user
+          </option>
           {listUsers.map((user) => ((
               <option key={user.id} value={user.id}>
                 {user.id === currentUserId ? 'You' : user.name}

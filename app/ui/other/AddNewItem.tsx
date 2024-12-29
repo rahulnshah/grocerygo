@@ -39,18 +39,21 @@ const AddNewItem = ({ list_id, currentUserId, listUsers }: { list_id: string, cu
           {state?.errors?.name && <p className="mt-1 text-sm text-red-500">{state?.errors?.name[0]}</p>}
         </div>
 
-        <div className="flex flex-col">
+        <div className="mb-4">
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700">Assign to</label>
         <select
           name="assigned_to"
           defaultValue={currentUserId}
           className="w-full px-3 py-2 border rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
+          <option value="" disabled>
+            Select a user
+          </option>
           {listUsers.map((user) => ((
-              <option key={user.id} value={user.id}>
-                {user.id === currentUserId ? 'You' : user.name}
-              </option>
-            )
-          ))}
+            <option key={user.id} value={user.id}>
+              {user.id === currentUserId ? 'You' : user.name}
+            </option>
+          )))}
         </select>
       </div>
 
