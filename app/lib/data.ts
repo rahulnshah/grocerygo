@@ -228,3 +228,21 @@ export async function getListUsers(list_id: string) {
     return [];
   }
 }
+
+export async function getAssignedItemsCount(userId: string) {
+  noStore();
+  try {
+    const result = await sql`
+      SELECT COUNT(*) 
+      FROM items i
+      JOIN lists l ON i.list_id = l.id
+      JOIN shared_lists sl ON l.id = sl.list_id
+      WHERE i.assigned_to = ${userId}
+        AND sl.shared_with_id = ${userId}
+    `;
+    return Number(result.rows[0].count);
+  } catch (error) {
+    console.error('Database Error:', error);
+    return 0;
+  }
+}
