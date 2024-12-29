@@ -10,22 +10,22 @@ export default function AllLinks() {
         <>
             <Link
                 href="/notebook"
-                className={`${isActive('/notebook') ? 'text-secondary' : 'text-white'
-                    } hover:text-gray-200`}
+                className={`${isActive('/notebook') ? 'text-primary' : 'text-white'
+                    } hover:text-primary`}
             >
                 Home
             </Link>
             <Link
                 href="/notebook/saved"
-                className={`${isActive('/notebook/saved') ? 'text-secondary' : 'text-white'
-                    } hover:text-gray-200`}
+                className={`${isActive('/notebook/saved') ? 'text-primary' : 'text-white'
+                    } hover:text-primary`}
             >
                 Saved
             </Link>
             <Link
                 href="/notebook/shared"
-                className={`${isActive('/notebook/shared') ? 'text-secondary' : 'text-white'
-                    } hover:text-gray-200`}
+                className={`${isActive('/notebook/shared') ? 'text-primary' : 'text-white'
+                    } hover:text-primary`}
             >
                 Shared
             </Link>

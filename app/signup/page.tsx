@@ -3,6 +3,7 @@ import * as React from 'react';
 import Navbar from '../ui/home/NavBar';
 import { createUserAndRedirectToLogin, UserState } from '../lib/actions';
 import { useActionState } from 'react';
+import Link from 'next/link';
 
 function SignUpPage() {
   const initialState: UserState = { message: null, errors: {} };
@@ -11,9 +12,9 @@ function SignUpPage() {
   return (
     <>
       <Navbar />
-      <form action={action} className="flex justify-center items-center min-h-screen bg-gray-50">
+      <form action={action} className="flex justify-center items-center min-h-screen p-8">
         <div className="flex flex-col w-1/2 bg-white p-8 shadow-lg rounded-lg">
-          <h1 className="text-xl font-semibold mb-6 text-center">Welcome to GroceryGo</h1>
+          <h1 className="text-xl font-semibold mb-6 text-center">Welcome to GroceryGo!</h1>
           <div className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -67,33 +68,34 @@ function SignUpPage() {
               )}
             </div>
             <p className="text-sm text-gray-600 mt-1">
-              - At least 8 characters <br />
+              - At least 6 characters <br />
               - One uppercase character <br />
               - One lowercase character <br />
               - One special character <br />
               - One number
             </p>
             <div className="flex items-center mt-3">
-              <input
+              {/* <input
                 id="checkbox"
                 type="checkbox"
                 className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-              />
-              <label htmlFor="checkbox" className="ml-2 block text-sm text-gray-700">
+              /> */}
+              {/* <label htmlFor="checkbox" className="ml-2 block text-sm text-gray-700">
                 I agree to the Terms and Privacy Policy.
-              </label>
+              </label> */}
             </div>
             <button
               type="submit"
-              className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 mt-4"
+              className="button-primary w-full focus:ring-offset-2 mt-4"
             >
               Create an account
             </button>
-            <p className="text-sm text-center mt-4">
+            <p className="button-primary text-sm text-center mt-4">
               Already have an account?{' '}
-              <button type="button" className="text-indigo-600 hover:underline">
+              <Link href="/login" className="text-white-600 hover:underline">
                 Login
-              </button>
+              </Link>
+              
             </p>
           </div>
         </div>
