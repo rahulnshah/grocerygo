@@ -1,102 +1,107 @@
+"use client";
 import * as React from 'react';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import TextField from
-    '@mui/material/TextField';
-import Checkbox from '@mui/material/Checkbox';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
 import Navbar from '../ui/home/NavBar';
-
-// import Visibility from '@mui/icons-material/Visibility';
-// import VisibilityOff from '@mui/icons-material/VisibilityOff';   
-
+import { createUserAndRedirectToLogin, UserState } from '../lib/actions';
+import { useActionState } from 'react';
+import Link from 'next/link';
 
 function SignUpPage() {
-    return (
-        <>
-            <Navbar />
-            <Box
-                sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    width: '50%', // Adjust width as needed
-                    alignItems: 'center',
-                    color: "black",
-                    backgroundColor: "white",
-                    position: 'relative',
-                    p: 4, // Add 
-                    height: '100vh', // Full viewport height
-                }}
+  const initialState: UserState = { message: null, errors: {} };
+  const [state, action] = useActionState(createUserAndRedirectToLogin, initialState);
+
+  return (
+    <>
+      <Navbar />
+      <form action={action} className="flex justify-center items-center min-h-screen p-8">
+        <div className="flex flex-col w-1/2 bg-white p-8 shadow-lg rounded-lg">
+          <h1 className="text-xl font-semibold mb-6 text-center">Welcome to GroceryGo!</h1>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                Name
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                className={`block w-full border ${
+                  state.errors?.name ? 'border-red-500' : 'border-gray-300'
+                } rounded-md px-3 py-2 mt-1 focus:ring-indigo-500 focus:border-indigo-500`}
+              />
+              {state.errors?.name && (
+                <p className="text-sm text-red-500 mt-1">{state.errors?.name[0]}</p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email Address
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                className={`block w-full border ${
+                  state.errors?.email ? 'border-red-500' : 'border-gray-300'
+                } rounded-md px-3 py-2 mt-1 focus:ring-indigo-500 focus:border-indigo-500`}
+              />
+              {state.errors?.email && (
+                <p className="text-sm text-red-500 mt-1">{state.errors?.email[0]}</p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                className={`block w-full border ${
+                  state.errors?.password ? 'border-red-500' : 'border-gray-300'
+                } rounded-md px-3 py-2 mt-1 focus:ring-indigo-500 focus:border-indigo-500`}
+              />
+              {state.errors?.password && (
+                <p className="text-sm text-red-500 mt-1">{state.errors?.password[0]}</p>
+              )}
+            </div>
+            <p className="text-sm text-gray-600 mt-1">
+              - At least 6 characters <br />
+              - One uppercase character <br />
+              - One lowercase character <br />
+              - One special character <br />
+              - One number
+            </p>
+            <div className="flex items-center mt-3">
+              {/* <input
+                id="checkbox"
+                type="checkbox"
+                className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+              /> */}
+              {/* <label htmlFor="checkbox" className="ml-2 block text-sm text-gray-700">
+                I agree to the Terms and Privacy Policy.
+              </label> */}
+            </div>
+            <button
+              type="submit"
+              className="button-primary w-full focus:ring-offset-2 mt-4"
             >
-                <Typography component="h1" variant="h5">
-                    Welcome to GroceryGo
-                </Typography>
-                <Box component="form" noValidate sx={{ mt: 1 }}>
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        id="email"
-                        label="Email Address"
-                        name="email"
-                        autoComplete="email"
-                        autoFocus
-                    />
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        id="username"
-                        label="Username"
-                        name="username"
-                        autoComplete="username"
-                    />
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        name="password"
-                        label="Password"
-                        type="password"
-                        id="password"
-                        autoComplete="current-password"
-                    />
-                    <Typography
-                        variant="body2" sx={{ mt: 1 }}>
-                        - At least 8 characters <br />
-                        - One uppercase character <br />
-                        - One lowercase character <br />
-                        - One special character <br />
-                        - One number
-                    </Typography>
-                    <Checkbox
-                        sx={{ mt: 3 }}
-                        color="primary"
-                        inputProps={{ 'aria-label': 'controlled' }}
-                    />
-                    <Typography variant="body2" sx={{ mt: 1 }}>
-                        I want to receive emails about the product, feature updates, events, and
-                        marketing promotions.
-                    </Typography>
-                    <Typography variant="body2" sx={{ mt: 1 }}>
-                        By creating an account, you agree to the Terms of use and Privacy Policy.
-                    </Typography>
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        sx={{ mt: 3, mb: 2 }}
-                    >
-                        Create an account
-                    </Button>
-                    <Typography variant="body2" align="center">
-                        Already have an account? <Button variant="text">Login</Button>
-                    </Typography>
-                </Box>
-            </Box>
-        </>
-    );
+              Create an account
+            </button>
+            <p className="button-primary text-sm text-center mt-4">
+              Already have an account?{' '}
+              <Link href="/login" className="text-white-600 hover:underline">
+                Login
+              </Link>
+              
+            </p>
+          </div>
+        </div>
+      </form>
+    </>
+  );
 }
 
 export default SignUpPage;

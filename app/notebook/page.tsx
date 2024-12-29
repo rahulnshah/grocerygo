@@ -1,13 +1,12 @@
-// app/notebook/page.tsx
-import { Box, Typography } from '@mui/material';
-
-const NotebookPage = () => {
+import NotebookPage from "./NoteBookPage";
+import { auth } from '../../auth';
+ 
+export default async function Page() {
+  const session = await auth()
+ 
+  if (!session?.user) return null;
+ 
   return (
-    <Box>
-      <Typography variant="h1">Hello Rahul!</Typography>
-      {/* Add more content here */}
-    </Box>
-  );
-};
-
-export default NotebookPage;
+    <NotebookPage user_id={session.user.id} username={session.user.name} />
+  )
+}

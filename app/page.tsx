@@ -1,29 +1,27 @@
-// import Image from "next/image";
-import { Box, Container, Typography, Button, Link } from '@mui/material';
+import Link from 'next/link';
 import Navbar from './ui/home/NavBar';
+
 export default function Home() {
   return (
     <>
       <Navbar />
-      <Container maxWidth="lg">
-        <Box sx={{ display: 'flex', marginLeft: '6rem', flexDirection: 'column', alignItems: 'left', justifyContent: 'center', height: '100vh' }}>
-          <Typography variant="h3" color="black" component="h1" gutterBottom>
+      <div className="container mx-auto px-4">
+        <div className="flex flex-col items-start justify-center h-screen ml-24">
+          <h1 className="text-4xl font-bold text-black mb-4">
             GroceryGo
-          </Typography>
-          <Typography variant="h5" color="black">
-            Say goodbye to forgotten items and disorganized lists. <br></br>Our app ensures you have everything you need,<br></br>right when you need it!
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-            <Link href="/signup">
-              <Button variant="contained" color="primary">
-                Sign up for free
-              </Button>
-            </Link>
+          </h1>
+          <p className="text-xl text-black -mb-1">
+            Say goodbye to forgotten items and disorganized lists. <br />
+            Our app ensures you have everything you need,<br />
+            right when you need it!
+          </p>
+          <div className="flex gap-4 mt-6">
+            <Link href="/signup" className="button-primary">Sign up for free</Link>
             {/* App Store button */}
             {/* Google Play button */}
-          </Box>
-        </Box>
-      </Container>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
