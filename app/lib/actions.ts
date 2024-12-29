@@ -443,3 +443,41 @@ export async function githubSignIn() {
   await signIn("github");
 }
 
+export async function copyList(list_id: string, formData: FormData) {
+  const user_id = formData.get('user_id');
+  if (!user_id || typeof user_id !== 'string') {
+    throw new Error('Invalid user ID');
+  }
+
+  try {
+    // Get original list details
+    const originalList = await sql`
+      SELECT name, description FROM lists WHERE id = ${list_id}
+    `;
+    
+    // Create new list with "(Copy)" suffix
+    const newList = await sql`
+      INSERT INTO lists (name, description, user_id)
+      VALUES (
+        ${originalList.rows[0].name + ' (Copy)'}, 
+        ${originalList.rows[0].description},
+        ${user_id}
+      )
+      RETURNING id
+    `;
+    
+    // Copy all items from original list
+    await sql`
+      INSERT INTO items (name, list_id, is_checked, assigned_to)
+      SELECT name, ${newList.rows[0].id}, false, ${user_id}
+      FROM items 
+      WHERE list_id = ${list_id}
+    `;
+
+    revalidatePath('/notebook');
+  } catch (error) {
+    console.log("copyList error", error);
+    throw new Error('Failed to copy list');
+  }
+}
+

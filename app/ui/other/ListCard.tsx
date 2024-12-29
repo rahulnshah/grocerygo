@@ -7,21 +7,25 @@ import { DeleteList } from '../notebook/DeleteList';
 import { UpdateList } from '../notebook/UpdateList';
 import { ShareList } from '../notebook/ShareList';
 import { MailList } from '../notebook/MailList';
+import CopyList from '../notebook/CopyList';
 interface ListCardProps {
   title: string;
   description: string;
   list_id: string;
-  owner_name?: string;
+  user_id?: string;
 }
 
-const ListCard = async ({ title, description, list_id }: ListCardProps) => {
+const ListCard = async ({ title, description, list_id, user_id }: ListCardProps) => {
   const { numItems, numCheckedItems } = await fetchListData(list_id);
   const is_favorited: boolean = await isFavorited(list_id);
   const session = await auth();
 
   if (!session?.user) return null;
   //console.log("Session is " ,session);
-
+  const owner_id = session.user.id;
+  console.log("owner_id is ", owner_id);
+  console.log("user_id is ", user_id);
+  const isOwner = owner_id === user_id;
   return (
     <div className="w-full bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
       <div className="p-4">
@@ -36,11 +40,18 @@ const ListCard = async ({ title, description, list_id }: ListCardProps) => {
         </Link>
         <p className="text-xs text-gray-500 mt-1">{numCheckedItems} out of {numItems} completed</p>
         <div className="flex justify-between items-center mt-auto space-x-1">
-          <FavIcon isFavorited={is_favorited} list_id={list_id} user_id={session.user.id} />
+          <FavIcon isFavorited={is_favorited} list_id={list_id} user_id={owner_id} />
           <MailList id={list_id} />
           <ShareList id={list_id} />
-          <UpdateList id={list_id} />
-          <DeleteList id={list_id} />
+          { isOwner && (
+            <>
+              <UpdateList id={list_id} />
+              <DeleteList id={list_id} />
+            </>
+          )}
+          {!isOwner && (user_id &&
+              <CopyList listId={list_id} userId={user_id} />
+            )}
         </div>
       </div>
     </div>

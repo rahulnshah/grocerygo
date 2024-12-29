@@ -17,7 +17,7 @@ export default async function SharedPage() {
             title={list.name}
             description={list.description}
             list_id={list.id}
-            owner_name={list.user_id}
+            user_id={list.user_id}
           />
         ))}
       </div>

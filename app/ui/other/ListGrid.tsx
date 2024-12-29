@@ -19,6 +19,7 @@ const ListGrid = async ({ user_id }: { user_id: string }) => {
               title={list.name}
               description={list.description}
               list_id={list.id}
+              user_id={list.user_id}
             />
           ))
         )}
