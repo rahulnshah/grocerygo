@@ -3,14 +3,20 @@ import React from 'react';
 import { fetchItems, fetchListById } from '@/app/lib/data';
 import ToBuyItem from '../../../ui/other/ToBuyItem';
 import AddNewItem from '@/app/ui/other/AddNewItem';
-
+import { getListUsers } from '@/app/lib/data';
+import { auth } from '@/auth';
 export default async function ItemsPage({ params }: { params: Promise<{ list_id: string }>}) {
+  const session = await auth();
+  if (!session) {
+    notFound();
+  }
   const a = await params;
+  const listUsers = await getListUsers(a.list_id);
   const list = await fetchListById(a.list_id);
   if (!list) {
     notFound();
   }
-
+  const currentUserId = session?.user?.id;
   const items = await fetchItems(a.list_id);
   // 
   return (
@@ -23,7 +29,7 @@ export default async function ItemsPage({ params }: { params: Promise<{ list_id:
         </div>
       </div>
       <div className="w-2/5">
-        <AddNewItem list_id={a.list_id} />
+        <AddNewItem currentUserId={currentUserId} listUsers={listUsers} list_id={a.list_id} />
       </div>
     </div>
   );

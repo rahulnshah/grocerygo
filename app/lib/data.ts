@@ -40,7 +40,7 @@ export async function searchUsers(query: string, ownerId: string) {
 export async function fetchSharedLists(owner_id: string) {
   noStore();
   try {
-    const data = await sql<List>`SELECT lists.id, lists.name, lists.description FROM shared_lists
+    const data = await sql<List>`SELECT lists.id, lists.user_id, lists.name, lists.description FROM shared_lists
       JOIN lists ON shared_lists.list_id = lists.id
       WHERE shared_with_id = ${owner_id} LIMIT 20`;
     return data.rows;
@@ -80,9 +80,20 @@ export async function fetchList(user_id: string) {
 
 export async function fetchItems(list_id: string) {
   noStore();
-
   try {
-    const data = await sql<ItemForm>`SELECT items.id, items.list_id, items.name, items.is_checked FROM items WHERE list_id = ${list_id} LIMIT 20`;
+    const data = await sql<ItemForm>`
+      SELECT 
+        items.id, 
+        items.list_id, 
+        items.name, 
+        items.is_checked,
+        items.assigned_to,
+        users.name as assigned_to_name
+      FROM items 
+      LEFT JOIN users ON items.assigned_to = users.id
+      WHERE list_id = ${list_id} 
+      LIMIT 20
+    `;
     return data.rows;
   } catch (error) {
     console.error('Database Error:', error);
@@ -189,5 +200,49 @@ export async function getUser(email: string){
   } catch (error) {
       console.error('Failed to fetch user:', error);
       throw new Error('Failed to fetch user.');
+  }
+}
+
+export async function getListUsers(list_id: string) {
+  noStore();
+  try {
+    const result = await sql<User>`
+      SELECT 
+        u.id,
+        u.name,
+        u.email,
+        u.created_at,
+        CASE 
+          WHEN l.user_id = u.id THEN true
+          ELSE false
+        END as is_owner
+      FROM lists l
+      LEFT JOIN shared_lists sl ON l.id = sl.list_id
+      LEFT JOIN users u ON sl.shared_with_id = u.id OR l.user_id = u.id
+      WHERE l.id = ${list_id}
+      GROUP BY u.id, u.name, u.email, l.user_id;
+    `;
+    return result.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    return [];
+  }
+}
+
+export async function getAssignedItemsCount(userId: string) {
+  noStore();
+  try {
+    const result = await sql`
+      SELECT COUNT(*) 
+      FROM items i
+      JOIN lists l ON i.list_id = l.id
+      JOIN shared_lists sl ON l.id = sl.list_id
+      WHERE i.assigned_to = ${userId}
+        AND sl.shared_with_id = ${userId}
+    `;
+    return Number(result.rows[0].count);
+  } catch (error) {
+    console.error('Database Error:', error);
+    return 0;
   }
 }

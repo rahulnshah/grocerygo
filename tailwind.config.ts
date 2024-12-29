@@ -8,10 +8,13 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      colors: {
+        primary: '#f97316',  // orange-500
+        secondary: '#1f2937', // gray-800
+        background: '#f8fafc', // slate-50
+      },
       backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+        'notebook-paper': "url('/notebook-paper-bg.jpg')",
       },
     },
   },

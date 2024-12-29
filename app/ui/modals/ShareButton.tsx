@@ -7,7 +7,7 @@ export default function ShareButton({ listId, userId }: { listId: string, userId
             <input type="hidden" name="user_id" value={userId} hidden readOnly/>
             <button
                 type="submit"
-            className="text-orange-500 hover:text-orange-600"
+            className="button-primary hover:bg-green-500"
             >
                 Share
             </button>

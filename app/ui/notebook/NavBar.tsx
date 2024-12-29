@@ -13,7 +13,7 @@ const Navbar = () => {
         }}>
           <button
             type="submit"
-            className="text-white hover:text-gray-200"
+            className="button-primary"
           >
             Log out
           </button>

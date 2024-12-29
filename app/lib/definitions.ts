@@ -48,6 +48,8 @@ export type ItemForm = {
     list_id: string;
     name: string;
     is_checked: boolean;
+    assigned_to: string;
+    assigned_to_name?: string;
 };
 
 export type User = {

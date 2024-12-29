@@ -8,14 +8,14 @@ const Navbar = () => {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <nav className="bg-brown-700 text-white shadow-md">
+    <nav className="bg-[#5B3A29] text-white shadow-md">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-4">
             <Link
               href="/"
               className={`px-3 py-2 rounded-md ${
-                isActive('/') ? 'bg-white text-brown-700' : 'hover:bg-white hover:text-brown-700'
+                isActive('/') ? 'text-primary' : 'hover:text-primary'
               }`}
             >
               Home
@@ -23,17 +23,22 @@ const Navbar = () => {
             <Link
               href="/about"
               className={`px-3 py-2 rounded-md ${
-                isActive('/about') ? 'bg-white text-brown-700' : 'hover:bg-white hover:text-brown-700'
+                isActive('/about') ? 'text-primary' : 'hover:text-primary'
               }`}
             >
               About
             </Link>
           </div>
           <div className="flex items-center space-x-4">
-            <Link href="/login" className="px-3 py-2 rounded-md hover:bg-white hover:text-brown-700">
+            <Link href="/login" 
+            className={`px-3 py-2 rounded-md ${
+                isActive('/login') ? 'text-primary' : 'hover:text-primary'
+              }`}>
               Log in
             </Link>
-            <Link href="/signup" className="px-3 py-2 rounded-md hover:bg-white hover:text-brown-700">
+            <Link href="/signup"  className={`px-3 py-2 rounded-md ${
+                isActive('/signup') ? 'text-primary' : 'hover:text-primary'
+              }`}>
               Sign up
             </Link>
           </div>

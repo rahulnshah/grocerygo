@@ -51,14 +51,14 @@ function LoginForm() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-2 mt-4 bg-blue-500 text-white rounded-md hover:bg-blue-400 disabled:bg-blue-300 transition"
+            className="button-primary w-full py-2 mt-4"
           >
             {isSubmitting ? 'Logging in...' : 'Log in'}
           </button>
 
           <p className="text-center mt-4 text-sm text-black">
             Don&apos;t have an account?{' '}
-            <Link href="/sign-up" className="text-blue-500 hover:text-blue-400">
+            <Link href="/signup" className="text-primary hover:underline">
               Sign up
             </Link>
           </p>

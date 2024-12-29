@@ -14,7 +14,7 @@ function LoginPage() {
               'use server';
               await signIn("github");
             }}
-          ><button type="submit">Sign in with GitHub</button>
+          ><button type="submit" className="button-primary">Sign in with GitHub</button>
           </form>
         </div>
 
