@@ -22,6 +22,10 @@ export type List = {
     updated_at: string;
 };
 
+export type ListWithCounts = List & {
+    item_count: number;
+};
+
 // Type for the favorites relationship
 export type FavoriteList = {
     id: string;
