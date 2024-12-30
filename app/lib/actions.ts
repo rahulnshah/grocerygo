@@ -5,9 +5,9 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
-import { getUser } from './data';
+import { fetchItems, getUser } from './data';
 import bcrypt from "bcrypt";
-import { User } from './definitions';
+import { Item, ItemForm, User } from './definitions';
 
 const FavoriteFormSchema = z.object({
   id: z.string(),
@@ -478,6 +478,52 @@ export async function copyList(list_id: string, formData: FormData) {
   } catch (error) {
     console.log("copyList error", error);
     throw new Error('Failed to copy list');
+  }
+}
+
+export async function mergeLists(list_id_1: string, list_id_2: string, user_id: string) {
+  try {
+    const items_1 : ItemForm[] = await fetchItems(list_id_1);
+    const items_2 : ItemForm[] = await fetchItems(list_id_2);
+
+    const setOfItems1 = new Set<string>();
+    items_1.forEach(item => setOfItems1.add(item.name));
+    items_2.forEach(item => {
+      if(!setOfItems1.has(item.name)) {
+        setOfItems1.add(item.name);
+      }
+    });
+
+    const merged_items = Array.from(setOfItems1).map(item => ({
+      name: item,
+      list_id: list_id_1, // or list_id_2, it doesn't matter which id is used
+      is_checked: false,
+      assigned_to: user_id,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }));
+
+    // Create merged list
+    const merged_list = await sql`INSERT INTO lists (name, description, user_id)
+      VALUES (${list_id_1 + ' & ' + list_id_2}, ${'Merged list of ' + list_id_1 + ' & ' + list_id_2}, ${user_id})
+      RETURNING id`;
+
+    merged_items.forEach(item => {
+      sql`INSERT INTO items (name, list_id, is_checked, assigned_to)
+        VALUES (${item.name}, ${merged_list.rows[0].id}, ${item.is_checked}, ${item.assigned_to})`;
+    });
+
+    // Delete original lists
+    deleteList(list_id_1);
+    deleteList(list_id_2);
+
+    revalidatePath('/notebook');
+    revalidatePath('/notebook/saved');
+
+  }
+  catch (error) {
+    console.log("mergeLists error", error);
+    throw new Error('Failed to merge lists');
   }
 }
 
