@@ -9,9 +9,9 @@ import { SessionProvider } from 'next-auth/react';
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: {
+  searchParams?: Promise<{
     topk?: string;
-  };
+  }>;
 }) {
   const session = await auth();
   if (!session?.user?.id) return null;
