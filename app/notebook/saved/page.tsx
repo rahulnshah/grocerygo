@@ -18,6 +18,7 @@ const SavedPage = async () => {
           title={list.name}
           description={list.description}
           list_id={list.id}
+          
         />
       ))}
     </div>

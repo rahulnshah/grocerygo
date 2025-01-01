@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
-import { fetchItems, getUser } from './data';
+import { fetchItems, getUser, fetchNameOfList } from './data';
 import bcrypt from "bcrypt";
 import { Item, ItemForm, SharedWithIds, User } from './definitions';
 
@@ -403,6 +403,7 @@ export async function deleteList(id: string) {
     //return { message: 'Deleted List.' };
   }
   catch (error) {
+    console.log("Database Error: Failed to Delete List",error);
     console.log('Database Error: Failed to Delete List.');
   }
   revalidatePath('/notebook');
@@ -489,6 +490,31 @@ export async function updateItemListId(list_id: string, item_id: string) {
     throw new Error('Failed to update item list id');
   }
 }
+
+export async function deleteListWithoutRevalidation(list_id: string) {
+  try {
+    await sql`DELETE FROM lists WHERE id = ${list_id}`;
+  }
+  catch (error) {
+    console.log('Database Error: Failed to Delete List.');
+    throw new Error('Failed to delete list');
+  }
+
+}
+
+export async function deleteItemWithoutRevalidation(item_id: string) {
+  try {
+    await sql`DELETE FROM items WHERE id = ${item_id}`;
+  }
+  catch (error) {
+    console.log('Database Error: Failed to Delete Item.');
+    throw new Error('Failed to delete item');
+  }
+}
+
+{
+
+}
 export async function mergeLists(user_id: string,  prevState: State, formData: FormData) {
   try {
     const list_id_1 = formData.get('list1');
@@ -499,6 +525,8 @@ export async function mergeLists(user_id: string,  prevState: State, formData: F
     if (list_id_1 === list_id_2) {
       return { message: 'Cannot merge the same list.', };
     }
+    const list1Name = await fetchNameOfList(list_id_1);
+    const list2Name = await fetchNameOfList(list_id_2);
     const items_1: ItemForm[] = await fetchItems(list_id_1);
     const items_2: ItemForm[] = await fetchItems(list_id_2);
 
@@ -507,14 +535,14 @@ export async function mergeLists(user_id: string,  prevState: State, formData: F
     const mergedItems: ItemForm[] = [];
     items_1.forEach(item => uniqueItemsFromList1.add(item.name));
     items_2.forEach(item => {
-      if (!uniqueItemsFromList1.has(item.name)) {
+      if (uniqueItemsFromList1.has(item.name)) {
         intersectionOfItems.add(item.name);
       }
     });
 
     // Create merged list
     const merged_list = await sql`INSERT INTO lists (name, description, user_id)
-    VALUES (${list_id_1 + ' & ' + list_id_2}, ${'Merged list of ' + list_id_1 + ' & ' + list_id_2}, ${user_id})
+    VALUES (${list1Name.name + ' & ' + list2Name.name}, ${'Merged list of ' + list_id_1 + ' & ' + list_id_2}, ${user_id})
     RETURNING id`;
 
     // loop through items_1 and items_2 add them to mergedItems
@@ -525,16 +553,8 @@ export async function mergeLists(user_id: string,  prevState: State, formData: F
       if (!intersectionOfItems.has(item.name)) {
         await updateItemListId(merged_list.rows[0].id, item.id);
       } else {
-        mergedItems.push(
-          {
-            ...item,
-            list_id: merged_list.rows[0].id,
-            is_checked: false, assigned_to: user_id,
-            assigned_to_name: user_id,
-          }
-        );
         // delete the item from the original list
-        await deleteItem(item.id, list_id_1);
+        await deleteItemWithoutRevalidation(item.id);
       }
     });
 
@@ -542,17 +562,8 @@ export async function mergeLists(user_id: string,  prevState: State, formData: F
       if (!intersectionOfItems.has(item.name)) {
         await updateItemListId(merged_list.rows[0].id, item.id);
       } else {
-        mergedItems.push(
-          {
-            ...item,
-            list_id: merged_list.rows[0].id,
-            is_checked: false, assigned_to: user_id,
-            assigned_to_name: user_id,
-          }
-        );
-
         // delete the item from the original list
-        await deleteItem(item.id, list_id_2);
+        await deleteItemWithoutRevalidation(item.id);
       }
     });
 
@@ -564,14 +575,14 @@ export async function mergeLists(user_id: string,  prevState: State, formData: F
     });
 
     // insert merged items into the merged list
-    mergedItems.forEach(async item => {
+    intersectionOfItems.forEach(async itemName => {
       await sql`INSERT INTO items (name, list_id, is_checked, assigned_to)
-        VALUES (${item.name}, ${merged_list.rows[0].id}, ${item.is_checked}, ${item.assigned_to})`;
+        VALUES (${itemName}, ${merged_list.rows[0].id}, ${false}, ${user_id})`;
     });
 
     // Delete original lists
-    deleteList(list_id_1);
-    deleteList(list_id_2);
+    await deleteListWithoutRevalidation(list_id_1);
+    await deleteListWithoutRevalidation(list_id_2);
 
     revalidatePath('/notebook');
     revalidatePath('/notebook/saved');
