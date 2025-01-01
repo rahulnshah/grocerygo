@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@datastructures-js/priority-queue": "^6.3.1",
     "@heroicons/react": "^2.2.0",
     "@types/bcrypt": "^5.0.2",
     "@vercel/postgres": "^0.9.0",

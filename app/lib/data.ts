@@ -7,8 +7,11 @@ import {
   ListForm,
   ItemForm,
   User,
-  SharedList
+  SharedList,
+  ListWithCounts
 } from './definitions';
+
+import { PriorityQueue } from '@datastructures-js/priority-queue';
 
 import { unstable_noStore as noStore } from 'next/cache';
 
@@ -244,5 +247,52 @@ export async function getAssignedItemsCount(userId: string) {
   } catch (error) {
     console.error('Database Error:', error);
     return 0;
+  }
+}
+
+export async function fetchListsWithCounts(user_id: string) {
+  noStore();
+  try {
+    const data = await sql<ListWithCounts>`
+      SELECT 
+        l.*,
+        COUNT(i.id) as item_count
+      FROM lists l
+      LEFT JOIN items i ON l.id = i.list_id
+      WHERE l.user_id = ${user_id}
+      GROUP BY l.id
+      ORDER BY l.created_at DESC
+    `;
+
+    return data.rows.map(list => ({
+      ...list,
+      item_count: Number(list.item_count)
+    }));
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch lists with counts.');
+  }
+}
+
+export async function fetchTopKFrequentLists(k: number, user_id: string) {
+  noStore();
+  try {
+    const lists: ListWithCounts[] = await fetchListsWithCounts(user_id);
+    lists.sort((a, b) => b.item_count - a.item_count);
+    return lists.slice(0, k);
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch top k frequent lists.');
+  }
+}
+
+export async function fetchTotalNumberOfLists(user_id: string) {
+  noStore(); 
+  try {
+    const lists = await sql`SELECT COUNT(*) FROM lists WHERE user_id = ${user_id}`;
+    return Number(lists.rows[0].count);
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of lists.');
   }
 }
