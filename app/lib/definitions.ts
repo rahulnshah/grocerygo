@@ -40,6 +40,9 @@ export type Favorite = {
     list_id: string;
     created_at: string;
 };
+export type SharedWithIds = {
+    shared_with_id: string;
+};
 
 export type ListForm = {
     id: string;
