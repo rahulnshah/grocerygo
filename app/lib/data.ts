@@ -278,24 +278,8 @@ export async function fetchTopKFrequentLists(k: number, user_id: string) {
   noStore();
   try {
     const lists: ListWithCounts[] = await fetchListsWithCounts(user_id);
-    const pq = new PriorityQueue<ListWithCounts>((a: ListWithCounts, b: ListWithCounts) => {
-      if(a.item_count > b.item_count) {
-        return -1;
-      }
-      else if(a.item_count < b.item_count) {
-        return 1;
-      }
-      return 0;
-    });
-    
-    lists.forEach((list: ListWithCounts) => {
-      pq.enqueue(list);
-      if(pq.size() > k) {
-        pq.dequeue();
-      }
-    });
-
-    return pq.toArray();
+    lists.sort((a, b) => b.item_count - a.item_count);
+    return lists.slice(0, k);
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch top k frequent lists.');

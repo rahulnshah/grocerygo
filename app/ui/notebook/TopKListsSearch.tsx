@@ -1,6 +1,6 @@
 'use client';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ChartBarIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 interface Props {
   totalLists: number;
@@ -23,7 +23,7 @@ export default function TopKListsSearch({ totalLists }: Props) {
 
   return (
     <div className="relative flex items-center">
-      <ChartBarIcon className="absolute left-3 h-5 w-5 text-gray-500 z-10" />
+      <ChevronDownIcon className="absolute left-3 h-5 w-5 text-gray-500 z-10" />
       <select
         defaultValue={searchParams.get('topk')?.toString() || ''}
         onChange={(e) => handleSelect(e.target.value)}
@@ -33,9 +33,11 @@ export default function TopKListsSearch({ totalLists }: Props) {
       >
         <option value="">Show all lists</option>
         {[...Array(totalLists + 1)].map((_, i) => (
-          <option key={i} value={i}>
-            Show top {i} lists by item count
-          </option>
+          i !== 0 ? (
+            <option key={i} value={i}>
+              Show top {i} lists by item count
+            </option>
+          ) : null
         ))}
       </select>
     </div>
