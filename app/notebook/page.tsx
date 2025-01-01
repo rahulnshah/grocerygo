@@ -17,8 +17,9 @@ export default async function Page({
   if (!session?.user?.id) return null;
 
   const totalLists = await fetchTotalNumberOfLists(session.user.id);
-  const lists = searchParams?.topk 
-    ? await fetchTopKFrequentLists(Number(searchParams.topk), session.user.id)
+  const params = await searchParams;
+  const lists = params?.topk 
+    ? await fetchTopKFrequentLists(Number(params.topk), session.user.id)
     : await fetchList(session.user.id);
 
   return (

@@ -494,32 +494,35 @@ export async function mergeLists(user_id: string, formData: FormData) {
     const items_1 : ItemForm[] = await fetchItems(list_id_1);
     const items_2 : ItemForm[] = await fetchItems(list_id_2);
 
-    const setOfItems1 = new Set<string>();
-    items_1.forEach(item => setOfItems1.add(item.name));
+    const uniqueItemsFromList1 = new Set<string>();
+    const intersectionOfItems = new Set<string>();
+    const mergedItems : ItemForm[] = [];
+    items_1.forEach(item => uniqueItemsFromList1.add(item.name));
     items_2.forEach(item => {
-      if(!setOfItems1.has(item.name)) {
-        setOfItems1.add(item.name);
+      if(!uniqueItemsFromList1.has(item.name)) {
+        intersectionOfItems.add(item.name);
       }
     });
 
-    const merged_items = Array.from(setOfItems1).map(item => ({
-      name: item,
-      list_id: list_id_1, // or list_id_2, it doesn't matter which id is used
-      is_checked: false,
-      assigned_to: user_id,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }));
-
     // Create merged list
     const merged_list = await sql`INSERT INTO lists (name, description, user_id)
-      VALUES (${list_id_1 + ' & ' + list_id_2}, ${'Merged list of ' + list_id_1 + ' & ' + list_id_2}, ${user_id})
-      RETURNING id`;
+    VALUES (${list_id_1 + ' & ' + list_id_2}, ${'Merged list of ' + list_id_1 + ' & ' + list_id_2}, ${user_id})
+    RETURNING id`;
 
-    merged_items.forEach(item => {
-      sql`INSERT INTO items (name, list_id, is_checked, assigned_to)
-        VALUES (${item.name}, ${merged_list.rows[0].id}, ${item.is_checked}, ${item.assigned_to})`;
-    });
+    // loop through items_1
+    // const merged_items = Array.from(setOfItems1).map(item => ({
+    //   name: item,
+    //   list_id: list_id_1, // or list_id_2, it doesn't matter which id is used
+    //   is_checked: false,
+    //   assigned_to: user_id,
+    //   created_at: new Date().toISOString(),
+    //   updated_at: new Date().toISOString()
+    // }));
+
+    // merged_items.forEach(item => {
+    //   sql`INSERT INTO items (name, list_id, is_checked, assigned_to)
+    //     VALUES (${item.name}, ${merged_list.rows[0].id}, ${item.is_checked}, ${item.assigned_to})`;
+    // });
 
     // Delete original lists
     deleteList(list_id_1);
