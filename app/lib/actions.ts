@@ -481,8 +481,16 @@ export async function copyList(list_id: string, formData: FormData) {
   }
 }
 
-export async function mergeLists(list_id_1: string, list_id_2: string, user_id: string) {
+export async function mergeLists(user_id: string, formData: FormData) {
   try {
+    const list_id_1 = formData.get('list1');
+    const list_id_2 = formData.get('list2');
+    if (!list_id_1 || !list_id_2 || typeof list_id_1 !== 'string' || typeof list_id_2 !== 'string') {
+      return { message: 'Invalid list IDs', };
+    }
+    if(list_id_1 === list_id_2) {
+      return { message: 'Cannot merge the same list.', };
+    }
     const items_1 : ItemForm[] = await fetchItems(list_id_1);
     const items_2 : ItemForm[] = await fetchItems(list_id_2);
 
@@ -519,11 +527,11 @@ export async function mergeLists(list_id_1: string, list_id_2: string, user_id: 
 
     revalidatePath('/notebook');
     revalidatePath('/notebook/saved');
-
+   
   }
   catch (error) {
-    console.log("mergeLists error", error);
-    throw new Error('Failed to merge lists');
+    return { message: 'Database Error: Failed to merge lists.', };
   }
+  return { message: "Form submitted" };
 }
 
