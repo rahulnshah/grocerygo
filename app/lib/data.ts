@@ -15,6 +15,16 @@ import { PriorityQueue } from '@datastructures-js/priority-queue';
 
 import { unstable_noStore as noStore } from 'next/cache';
 
+export async function fetchNameOfList(list_id: string) {
+  noStore();
+  try {
+    const data = await sql<ListForm>`SELECT * FROM lists WHERE id = ${list_id}`;
+    return data.rows[0];
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch list description.');
+  }
+}
 export async function searchUsers(query: string, ownerId: string) {
   noStore();
   if (!query || query.length < 2) {
