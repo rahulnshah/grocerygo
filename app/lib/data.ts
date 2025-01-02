@@ -25,7 +25,7 @@ export async function fetchNameOfList(list_id: string) {
     throw new Error('Failed to fetch list description.');
   }
 }
-export async function searchUsers(query: string, ownerId: string) {
+export async function searchUsers(query: string, ownerId: string, listId: string) {
   noStore();
   if (!query || query.length < 2) {
     return { users: [] };
@@ -36,6 +36,16 @@ export async function searchUsers(query: string, ownerId: string) {
       SELECT *
       FROM users
       WHERE (name ILIKE ${`%${query}%`} OR email ILIKE ${`%${query}%`}) AND id != ${ownerId}
+      AND id NOT IN (
+      SELECT shared_with_id 
+      FROM shared_lists 
+      WHERE list_id = ${listId}
+    )
+      AND id NOT IN (
+      SELECT owner_id
+      FROM shared_lists
+      WHERE list_id = ${listId}
+    )
     `;
     console.log('Result:', result.rows);
     // const fuse = new Fuse(result.rows, {
@@ -184,7 +194,7 @@ export async function fetchListById(id: string) {
   }
 }
 
-export async function isFavorited(list_id: string):Promise<boolean> {
+export async function isFavorited(list_id: string): Promise<boolean> {
   noStore();
   try {
     const result = await sql`
@@ -204,15 +214,15 @@ export async function isFavorited(list_id: string):Promise<boolean> {
 }
 
 
-export async function getUser(email: string){
+export async function getUser(email: string) {
   try {
-      const user = await sql<User>`SELECT * FROM users WHERE email=${email}`;
-      let row = user.rows[0];
-      // console.log('User:', row);
-      return row;
+    const user = await sql<User>`SELECT * FROM users WHERE email=${email}`;
+    let row = user.rows[0];
+    // console.log('User:', row);
+    return row;
   } catch (error) {
-      console.error('Failed to fetch user:', error);
-      throw new Error('Failed to fetch user.');
+    console.error('Failed to fetch user:', error);
+    throw new Error('Failed to fetch user.');
   }
 }
 
@@ -297,7 +307,7 @@ export async function fetchTopKFrequentLists(k: number, user_id: string) {
 }
 
 export async function fetchTotalNumberOfLists(user_id: string) {
-  noStore(); 
+  noStore();
   try {
     const lists = await sql`SELECT COUNT(*) FROM lists WHERE user_id = ${user_id}`;
     return Number(lists.rows[0].count);
