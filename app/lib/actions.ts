@@ -5,9 +5,9 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
-import { getUser } from './data';
+import { fetchItems, getUser, fetchNameOfList } from './data';
 import bcrypt from "bcrypt";
-import { User } from './definitions';
+import { Item, ItemForm, SharedWithIds, User } from './definitions';
 
 const FavoriteFormSchema = z.object({
   id: z.string(),
@@ -403,6 +403,7 @@ export async function deleteList(id: string) {
     //return { message: 'Deleted List.' };
   }
   catch (error) {
+    console.log("Database Error: Failed to Delete List", error);
     console.log('Database Error: Failed to Delete List.');
   }
   revalidatePath('/notebook');
@@ -454,7 +455,7 @@ export async function copyList(list_id: string, formData: FormData) {
     const originalList = await sql`
       SELECT name, description FROM lists WHERE id = ${list_id}
     `;
-    
+
     // Create new list with "(Copy)" suffix
     const newList = await sql`
       INSERT INTO lists (name, description, user_id)
@@ -465,7 +466,7 @@ export async function copyList(list_id: string, formData: FormData) {
       )
       RETURNING id
     `;
-    
+
     // Copy all items from original list
     await sql`
       INSERT INTO items (name, list_id, is_checked, assigned_to)
@@ -478,6 +479,137 @@ export async function copyList(list_id: string, formData: FormData) {
   } catch (error) {
     console.log("copyList error", error);
     throw new Error('Failed to copy list');
+  }
+}
+export async function updateItemListId(list_id: string, item_id: string) {
+  try {
+    await sql`UPDATE items SET list_id = ${list_id} WHERE id = ${item_id}`;
+  }
+  catch (error) {
+    console.log("updateItemListId error", error);
+    throw new Error('Failed to update item list id');
+  }
+}
+
+export async function deleteListWithoutRevalidation(list_id: string) {
+  try {
+    await sql`DELETE FROM lists WHERE id = ${list_id}`;
+  }
+  catch (error) {
+    console.log('Database Error: Failed to Delete List.');
+    throw new Error('Failed to delete list');
+  }
+
+}
+
+export async function deleteItemWithoutRevalidation(item_id: string) {
+  try {
+    await sql`DELETE FROM items WHERE id = ${item_id}`;
+  }
+  catch (error) {
+    console.log('Database Error: Failed to Delete Item.');
+    throw new Error('Failed to delete item');
+  }
+}
+
+{
+
+}
+export async function mergeLists(user_id: string, prevState: State, formData: FormData) {
+  try {
+    const list_id_1 = formData.get('list1');
+    const list_id_2 = formData.get('list2');
+
+    if (!list_id_1 || !list_id_2 || typeof list_id_1 !== 'string' || typeof list_id_2 !== 'string') {
+      return { message: 'Invalid list IDs' };
+    }
+
+    if (list_id_1 === list_id_2) {
+      return { message: 'Cannot merge the same list.' };
+    }
+
+    const list1Name = await fetchNameOfList(list_id_1);
+    const list2Name = await fetchNameOfList(list_id_2);
+    const items_1: ItemForm[] = await fetchItems(list_id_1);
+    const items_2: ItemForm[] = await fetchItems(list_id_2);
+
+    const uniqueItemsFromList1 = new Set<string>();
+    const intersectionOfItems = new Set<string>();
+
+    items_1.forEach(item => uniqueItemsFromList1.add(item.name));
+    items_2.forEach(item => {
+      if (uniqueItemsFromList1.has(item.name)) {
+        intersectionOfItems.add(item.name);
+      }
+    });
+
+    const merged_list = await sql`
+      INSERT INTO lists (name, description, user_id)
+      VALUES (${list1Name.name + ' & ' + list2Name.name}, ${'Merged list of ' + list_id_1 + ' & ' + list_id_2}, ${user_id})
+      RETURNING id
+    `;
+
+    // Handle items for merged list
+    await Promise.all(
+      items_1.map(async (item) => {
+        if (!intersectionOfItems.has(item.name)) {
+          await updateItemListId(merged_list.rows[0].id, item.id);
+        } else {
+          await deleteItemWithoutRevalidation(item.id);
+        }
+      })
+    );
+
+    await Promise.all(
+      items_2.map(async (item) => {
+        if (!intersectionOfItems.has(item.name)) {
+          await updateItemListId(merged_list.rows[0].id, item.id);
+        } else {
+          await deleteItemWithoutRevalidation(item.id);
+        }
+      })
+    );
+
+    // Insert intersection items into merged list
+    await Promise.all(
+      Array.from(intersectionOfItems).map(async (itemName) => {
+        await sql`
+          INSERT INTO items (name, list_id, is_checked, assigned_to)
+          VALUES (${itemName}, ${merged_list.rows[0].id}, ${false}, ${user_id})
+        `;
+      })
+    );
+
+    // Handle shared users for merged list
+    const sharedUsers = await sql`
+      SELECT DISTINCT shared_with_id
+      FROM shared_lists
+      WHERE list_id = ${list_id_1} OR list_id = ${list_id_2}
+    `;
+
+    // Delete original lists
+    await deleteListWithoutRevalidation(list_id_1);
+    await deleteListWithoutRevalidation(list_id_2);
+    
+
+    await Promise.all(
+      sharedUsers.rows.map(async (user) => {
+        await sql`
+        INSERT INTO shared_lists (owner_id, shared_with_id, list_id)
+        VALUES (${user_id}, ${user.shared_with_id}, ${merged_list.rows[0].id})
+        ON CONFLICT (list_id, shared_with_id) DO NOTHING
+        `;
+      })
+    );
+
+
+    revalidatePath('/notebook');
+    revalidatePath('/notebook/saved');
+
+    return { message: 'Lists merged successfully.' };
+  } catch (error) {
+    console.error('Error merging lists:', error);
+    return { message: 'Error merging lists.', error };
   }
 }
 

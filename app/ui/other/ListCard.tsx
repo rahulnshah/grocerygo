@@ -2,7 +2,7 @@ import React from 'react';
 import FavIcon from '../list/FavIcon';
 import { auth } from '@/auth';
 import Link from 'next/link';
-import { fetchListData, getListUsers, isFavorited } from '@/app/lib/data';
+import { fetchListData, getListSharedUsers, isFavorited } from '@/app/lib/data';
 import { DeleteList } from '../notebook/DeleteList';
 import { UpdateList } from '../notebook/UpdateList';
 import { ShareList } from '../notebook/ShareList';
@@ -17,7 +17,7 @@ interface ListCardProps {
 
 const ListCard = async ({ title, description, list_id, user_id }: ListCardProps) => {
   const { numItems, numCheckedItems } = await fetchListData(list_id);
-  const listUsers = await getListUsers(list_id);
+  const listUsers = await getListSharedUsers(list_id, user_id!);
   const is_favorited: boolean = await isFavorited(list_id);
   const session = await auth();
 
@@ -36,22 +36,22 @@ const ListCard = async ({ title, description, list_id, user_id }: ListCardProps)
           <div className="flex items-center mt-2">
             {/* <img src="path/to/avatar1.jpg" alt="Avatar 1" className="w-6 h-6 rounded-full" />
             <img src="path/to/avatar2.jpg" alt="Avatar 2" className="w-6 h-6 rounded-full -ml-2" /> */}
-            {listUsers.length > 1 && (
+            {listUsers.users.length > 0 && (
               <div className="text-sm text-gray-500">
-                Shared with {listUsers.length} {isOwner && 'other'} users {!isOwner && 'including you'}
+                Shared with {listUsers.users.length} {isOwner && 'other'} users {!isOwner && 'including you'}
               </div> 
             )}
           </div>
         </Link>
         <p className="text-xs text-gray-500 mt-1">{numCheckedItems} out of {numItems} completed</p>
         <div className="flex justify-between items-center mt-auto space-x-1">
-          <FavIcon isFavorited={is_favorited} list_id={list_id} user_id={owner_id} />
+          {isOwner && <FavIcon isFavorited={is_favorited} list_id={list_id} user_id={owner_id} />}
           <MailList id={list_id} />
           <ShareList id={list_id} />
           { isOwner && (
             <>
               <UpdateList id={list_id} />
-              <DeleteList id={list_id} />
+              {numItems === 0 && <DeleteList id={list_id} />}
             </>
           )}
           {!isOwner && (user_id &&

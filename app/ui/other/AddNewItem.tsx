@@ -5,7 +5,7 @@ import { ItemState } from '@/app/lib/actions';
 import { useActionState } from 'react';
 import { getListUsers } from '@/app/lib/data';
 import { User } from 'next-auth';
-const AddNewItem = ({ list_id, currentUserId, listUsers }: { list_id: string, currentUserId: string, listUsers: User[] }) => {
+const AddNewItem = ({ list_id, currentUserId, listUsers, list_name }: { list_id: string, currentUserId: string, listUsers: User[], list_name: string }) => {
   const initialState: ItemState = { message: null, errors: {} };
   const createItemWithListId = createItem.bind(null, list_id);
   const [state, formAction] = useActionState(createItemWithListId, initialState);
@@ -18,7 +18,7 @@ const AddNewItem = ({ list_id, currentUserId, listUsers }: { list_id: string, cu
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <h2 className="text-xl font-semibold mb-4">Add New Item</h2>
+        <h2 className="text-xl font-semibold mb-4">Add New Item to {list_name}</h2>
         
         <div className="mb-4">
           <input

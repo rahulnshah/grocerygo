@@ -1,11 +1,10 @@
 import React from 'react';
 import ListCard from './ListCard';
 import { fetchList } from '../../lib/data';
+import { FavoriteList, List, ListWithCounts, SharedList } from '@/app/lib/definitions';
 
-const ListGrid = async ({ user_id }: { user_id: string }) => {
+const ListGrid = async ({ lists }: { lists: ListWithCounts[] | List[]  }) => {
   try {
-    const lists = await fetchList(user_id);
-
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6">
         {lists.length === 0 ? (

@@ -16,6 +16,7 @@ export default async function ItemsPage({ params }: { params: Promise<{ list_id:
   if (!list) {
     notFound();
   }
+  const listName = list.name;
   const currentUserId = session?.user?.id;
   const items = await fetchItems(a.list_id);
   // 
@@ -29,7 +30,7 @@ export default async function ItemsPage({ params }: { params: Promise<{ list_id:
         </div>
       </div>
       <div className="w-2/5">
-        <AddNewItem currentUserId={currentUserId} listUsers={listUsers} list_id={a.list_id} />
+        <AddNewItem currentUserId={currentUserId} listUsers={listUsers} list_name={listName} list_id={a.list_id} />
       </div>
     </div>
   );
