@@ -403,7 +403,7 @@ export async function deleteList(id: string) {
     //return { message: 'Deleted List.' };
   }
   catch (error) {
-    console.log("Database Error: Failed to Delete List",error);
+    console.log("Database Error: Failed to Delete List", error);
     console.log('Database Error: Failed to Delete List.');
   }
   revalidatePath('/notebook');
@@ -515,16 +515,19 @@ export async function deleteItemWithoutRevalidation(item_id: string) {
 {
 
 }
-export async function mergeLists(user_id: string,  prevState: State, formData: FormData) {
+export async function mergeLists(user_id: string, prevState: State, formData: FormData) {
   try {
     const list_id_1 = formData.get('list1');
     const list_id_2 = formData.get('list2');
+
     if (!list_id_1 || !list_id_2 || typeof list_id_1 !== 'string' || typeof list_id_2 !== 'string') {
-      return { message: 'Invalid list IDs', };
+      return { message: 'Invalid list IDs' };
     }
+
     if (list_id_1 === list_id_2) {
-      return { message: 'Cannot merge the same list.', };
+      return { message: 'Cannot merge the same list.' };
     }
+
     const list1Name = await fetchNameOfList(list_id_1);
     const list2Name = await fetchNameOfList(list_id_2);
     const items_1: ItemForm[] = await fetchItems(list_id_1);
@@ -532,7 +535,7 @@ export async function mergeLists(user_id: string,  prevState: State, formData: F
 
     const uniqueItemsFromList1 = new Set<string>();
     const intersectionOfItems = new Set<string>();
-    const mergedItems: ItemForm[] = [];
+
     items_1.forEach(item => uniqueItemsFromList1.add(item.name));
     items_2.forEach(item => {
       if (uniqueItemsFromList1.has(item.name)) {
@@ -540,58 +543,73 @@ export async function mergeLists(user_id: string,  prevState: State, formData: F
       }
     });
 
-    // Create merged list
-    const merged_list = await sql`INSERT INTO lists (name, description, user_id)
-    VALUES (${list1Name.name + ' & ' + list2Name.name}, ${'Merged list of ' + list_id_1 + ' & ' + list_id_2}, ${user_id})
-    RETURNING id`;
+    const merged_list = await sql`
+      INSERT INTO lists (name, description, user_id)
+      VALUES (${list1Name.name + ' & ' + list2Name.name}, ${'Merged list of ' + list_id_1 + ' & ' + list_id_2}, ${user_id})
+      RETURNING id
+    `;
 
-    // loop through items_1 and items_2 add them to mergedItems
-    // if an item is in intersectionOfItems, update the item's list_id to merged_list.rows[0].id
-    // if an item is not in intersectionOfItems, add it to mergedItems, with list_id = merged_list.rows[0].id, is_checked = false, assigned_to = user_id to false, assigned_to_name = user_id
+    // Handle items for merged list
+    await Promise.all(
+      items_1.map(async (item) => {
+        if (!intersectionOfItems.has(item.name)) {
+          await updateItemListId(merged_list.rows[0].id, item.id);
+        } else {
+          await deleteItemWithoutRevalidation(item.id);
+        }
+      })
+    );
 
-    items_1.forEach(async item => {
-      if (!intersectionOfItems.has(item.name)) {
-        await updateItemListId(merged_list.rows[0].id, item.id);
-      } else {
-        // delete the item from the original list
-        await deleteItemWithoutRevalidation(item.id);
-      }
-    });
+    await Promise.all(
+      items_2.map(async (item) => {
+        if (!intersectionOfItems.has(item.name)) {
+          await updateItemListId(merged_list.rows[0].id, item.id);
+        } else {
+          await deleteItemWithoutRevalidation(item.id);
+        }
+      })
+    );
 
-    items_2.forEach(async item => {
-      if (!intersectionOfItems.has(item.name)) {
-        await updateItemListId(merged_list.rows[0].id, item.id);
-      } else {
-        // delete the item from the original list
-        await deleteItemWithoutRevalidation(item.id);
-      }
-    });
+    // Insert intersection items into merged list
+    await Promise.all(
+      Array.from(intersectionOfItems).map(async (itemName) => {
+        await sql`
+          INSERT INTO items (name, list_id, is_checked, assigned_to)
+          VALUES (${itemName}, ${merged_list.rows[0].id}, ${false}, ${user_id})
+        `;
+      })
+    );
 
-    // get all shared users of list_id_1 and list_id_2 and update shared_lists table where list_id = merged_list.rows[0].id and shared_with_id = user_id where shared_with_id is in the list of shared users
-    const sharedUsers = await sql`SELECT shared_with_id FROM shared_lists WHERE list_id = ${list_id_1} OR list_id = ${list_id_2}`;
-    const sharedUsersIds: string[] = sharedUsers.rows.map(user => user.shared_with_id);
-    sharedUsersIds.forEach(async shared_with_id => {
-      await sql`UPDATE shared_lists SET list_id = ${merged_list.rows[0].id} WHERE (list_id = ${list_id_1} OR list_id = ${list_id_2}) AND shared_with_id = ${shared_with_id}`;
-    });
-
-    // insert merged items into the merged list
-    intersectionOfItems.forEach(async itemName => {
-      await sql`INSERT INTO items (name, list_id, is_checked, assigned_to)
-        VALUES (${itemName}, ${merged_list.rows[0].id}, ${false}, ${user_id})`;
-    });
+    // Handle shared users for merged list
+    const sharedUsers = await sql`
+      SELECT DISTINCT shared_with_id
+      FROM shared_lists
+      WHERE list_id = ${list_id_1} OR list_id = ${list_id_2}
+    `;
 
     // Delete original lists
     await deleteListWithoutRevalidation(list_id_1);
     await deleteListWithoutRevalidation(list_id_2);
+    
+
+    await Promise.all(
+      sharedUsers.rows.map(async (user) => {
+        await sql`
+        INSERT INTO shared_lists (owner_id, shared_with_id, list_id)
+        VALUES (${user_id}, ${user.shared_with_id}, ${merged_list.rows[0].id})
+        ON CONFLICT (list_id, shared_with_id) DO NOTHING
+        `;
+      })
+    );
+
 
     revalidatePath('/notebook');
     revalidatePath('/notebook/saved');
 
+    return { message: 'Lists merged successfully.' };
+  } catch (error) {
+    console.error('Error merging lists:', error);
+    return { message: 'Error merging lists.', error };
   }
-  catch (error) {
-    console.log("mergeLists error", error);
-    return { message: 'Database Error: Failed to merge lists.', };
-  }
-  return { message: "Form submitted" };
 }
 
