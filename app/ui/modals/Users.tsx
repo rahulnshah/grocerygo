@@ -3,7 +3,7 @@ import ShareButton from "./ShareButton";
 import UnshareButton from "./UnshareButton";
 
 export default async function Users({ listId, ownerId, searchQuery, sharedIds }: { listId: string, ownerId: string, searchQuery: string, sharedIds: Set<string> }) {
-    const users = await searchUsers(searchQuery, ownerId);
+    const users = await searchUsers(searchQuery, ownerId, listId);
     console.log("searched users", users.users);
     return (
         <>
