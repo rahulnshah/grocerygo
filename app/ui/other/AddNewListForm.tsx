@@ -4,7 +4,6 @@ import { useActionState } from 'react';
 import { createList } from '@/app/lib/actions';
 import { State } from '@/app/lib/actions';
 import { useSession } from "next-auth/react";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 const AddNewListForm = () => {
   const { data: session, status } = useSession();
   const initialState: State = { message: null, errors: {} };
@@ -13,33 +12,24 @@ const AddNewListForm = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
- async function generateDescription(title: string) {
-    if (!title || typeof title !== 'string') {
-      throw new Error('Invalid title');
-    }
-    let result:any = null;
-    
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error('GOOGLE_API_KEY is not defined');
-    }
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-  
-    const prompt = `give sentence-long description for shopping list titled '${title}'`;
-  
-    result = await model.generateContent(prompt);
-    return result;
-  }
-
   async function handleClick() {
     try {
-      const result = await generateDescription(name); // Pass title to the server action
-      setDescription(result.response.text());
+      const result = await fetch("/api/gemini", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+
+      if (!result.ok) {
+        throw new Error("Failed to fetch data");
+      }
+
+      const newDescription = await result.json();
+      setDescription(newDescription.message);
     } catch (err) {
-      console.error("error generating description", err);
+      console.error("error occured generating description", err);
     } finally {
-      console.log("description generated");
+      console.log("done");
     }
   }
 
