@@ -5,6 +5,9 @@ import ToBuyItem from '../../../ui/other/ToBuyItem';
 import AddNewItem from '@/app/ui/other/AddNewItem';
 import { getListUsers } from '@/app/lib/data';
 import { auth } from '@/auth';
+import { Suspense } from 'react';
+import ToBuyItemSkeleton from '@/app/ui/other/ToBuyItemSkeleton';
+
 export default async function ItemsPage({ params }: { params: Promise<{ list_id: string }>}) {
   const session = await auth();
   if (!session) {
@@ -25,7 +28,9 @@ export default async function ItemsPage({ params }: { params: Promise<{ list_id:
       <div className="w-3/5">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6">
           {items.map((item) => (
-            <ToBuyItem key={item.id} item={item} />
+            <Suspense key={item.id} fallback={<ToBuyItemSkeleton />}>
+              <ToBuyItem item={item} />
+            </Suspense>
           ))}
         </div>
       </div>
