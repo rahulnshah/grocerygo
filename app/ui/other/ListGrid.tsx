@@ -2,7 +2,8 @@ import React from 'react';
 import ListCard from './ListCard';
 import { fetchList } from '../../lib/data';
 import { FavoriteList, List, ListWithCounts, SharedList } from '@/app/lib/definitions';
-
+import { Suspense } from 'react';
+import ListCardSkeleton from './ListCardSkeleton';
 const ListGrid = async ({ lists }: { lists: ListWithCounts[] | List[]  }) => {
   try {
     return (
@@ -13,13 +14,14 @@ const ListGrid = async ({ lists }: { lists: ListWithCounts[] | List[]  }) => {
           </div>
         ) : (
           lists.map((list) => (
-            <ListCard
-              key={list.id}
-              title={list.name}
-              description={list.description}
-              list_id={list.id}
-              user_id={list.user_id}
-            />
+            <Suspense key={list.id} fallback={<ListCardSkeleton />}>
+              <ListCard
+                title={list.name}
+                description={list.description}
+                list_id={list.id}
+                user_id={list.user_id}
+              />
+            </Suspense>
           ))
         )}
       </div>
