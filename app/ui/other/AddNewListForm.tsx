@@ -4,15 +4,19 @@ import { useActionState } from 'react';
 import { createList } from '@/app/lib/actions';
 import { State } from '@/app/lib/actions';
 import { useSession } from "next-auth/react";
+import { SparklesIcon } from '@heroicons/react/24/solid';
 const AddNewListForm = () => {
   const { data: session, status } = useSession();
   const initialState: State = { message: null, errors: {} };
   const createListWithListIdAndUserId = createList.bind(null, session?.user?.id!);
   const [state, formAction] = useActionState(createListWithListIdAndUserId, initialState);
   const [name, setName] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [description, setDescription] = useState("");
 
   async function handleClick() {
+    setLoading(true);
     try {
       const result = await fetch("/api/gemini", {
         method: "POST",
@@ -21,15 +25,17 @@ const AddNewListForm = () => {
       });
 
       if (!result.ok) {
-        throw new Error("Failed to fetch data");
+        const errorExists = await result.json();
+        throw new Error(errorExists.error ? errorExists.error : "Failed to fetch data from Gemini API");
       }
 
       const newDescription = await result.json();
       setDescription(newDescription.message);
-    } catch (err) {
-      console.error("error occured generating description", err);
+      setError("");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
-      console.log("done");
+      setLoading(false);
     }
   }
 
@@ -70,14 +76,18 @@ const AddNewListForm = () => {
               />
             </div>
             {state?.errors?.description && <p className="mt-1 text-sm text-red-500">{state?.errors?.description[0]}</p>}
+            {error && <p  className="mt-1 text-sm text-red-500">{error}</p>}
           </div>
           <button
             type="button"
-            className="button-primary"
+            disabled={loading}
+            className="button-primary flex items-center justify-center space-x-2"
             onClick={handleClick}
           >
-            Generate
+            <SparklesIcon className='h-5 w-5' />
+            {loading ? "Loading..." : "Generate"}
           </button>
+          
           <button
             type="submit"
             className="w-full py-2 px-4 mt-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
