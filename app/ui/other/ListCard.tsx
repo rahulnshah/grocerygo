@@ -46,7 +46,7 @@ const ListCard = async ({ title, description, list_id, user_id }: ListCardProps)
         <p className="text-xs text-gray-500 mt-1">{numCheckedItems} out of {numItems} completed</p>
         <div className="flex justify-between items-center mt-auto">
           {isOwner && <FavIcon isFavorited={is_favorited} list_id={list_id} user_id={owner_id} />}
-          <MailList id={list_id} />
+          <MailList list_title={title} id={list_id} />
           <ShareList id={list_id} />
           { isOwner && (
             <>
