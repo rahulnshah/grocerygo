@@ -12,7 +12,7 @@ export function MailList({ list_title, id }: { list_title: string, id: string })
     setLoading(true);
     try {
       // Fetch list details from API
-      const items = await fetchItems(id);
+      const items: ItemForm[] = await fetchItems(id);
 
       // Create a new PDF document
       const doc = new jsPDF(
