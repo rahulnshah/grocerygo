@@ -1,13 +1,17 @@
 'use server';
 import { z } from 'zod';
-import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
-import { fetchItems, getUser, fetchNameOfList } from './data';
 import bcrypt from "bcrypt";
-import { Item, ItemForm, SharedWithIds, User } from './definitions';
+import { drizzle } from 'drizzle-orm/neon-http';
+import { and, eq, sql, or } from 'drizzle-orm';
+import { lists, items, users, sharedLists, favorites } from './schema';
+import { fetchItems, getUser, fetchNameOfList } from './data';
+import { ItemForm } from './definitions';
+
+const database = drizzle(process.env.DATABASE_URL!);
 
 const FavoriteFormSchema = z.object({
   id: z.string(),
@@ -106,16 +110,18 @@ export async function shareList(listId: string, formData: FormData) {
   }
 
   try {
-    await sql`
-      INSERT INTO shared_lists (owner_id, shared_with_id, list_id, shared_at)
-      VALUES (
-        (SELECT user_id FROM lists WHERE id = ${listId}),
-        ${userId},
-        ${listId},
-        NOW()
-      )
-      ON CONFLICT (list_id, shared_with_id) DO NOTHING
-    `;
+    const list = await database
+      .select({ userId: lists.userId })
+      .from(lists)
+      .where(eq(lists.id, parseInt(listId)))
+      .then(rows => rows[0]);
+
+    await database.insert(sharedLists).values({
+      ownerId: list.userId,
+      sharedWithId: parseInt(userId),
+      listId: parseInt(listId)
+    });
+
     revalidatePath(`/notebook/lists/share-modal/${listId}`);
     revalidatePath('/notebook/shared');
   } catch (error) {
@@ -131,11 +137,15 @@ export async function unshareList(listId: string, formData: FormData) {
   }
 
   try {
-    await sql`
-      DELETE FROM shared_lists
-      WHERE list_id = ${listId}
-      AND shared_with_id = ${userId}
-    `;
+    await database
+      .delete(sharedLists)
+      .where(
+        and(
+          eq(sharedLists.listId, parseInt(listId)),
+          eq(sharedLists.sharedWithId, parseInt(userId))
+        )
+      );
+      
     revalidatePath(`/notebook/lists/share-modal/${listId}`);
     revalidatePath('/notebook/shared');
   } catch (error) {
@@ -161,12 +171,14 @@ export async function createList(user_id: string, prevState: State, formData: Fo
   const { name, description } = validatedFields.data;
 
   try {
-    await sql`
-        INSERT INTO lists (user_id, name, description)
-        VALUES (${user_id}, ${name}, ${description})
-      `;
+    await database.insert(lists).values({
+      userId: parseInt(user_id),
+      name,
+      description
+    });
+
     revalidatePath('/notebook');
-    return { message: "Form submitted" }; // or some relevant message
+    return { message: "Form submitted" };
   }
   catch (error) {
     return { message: 'Database Error: Failed to Create List.', };
@@ -180,7 +192,9 @@ export async function createItem(list_id: string, prevState: ItemState, formData
     assigned_to: formData.get('assigned_to')
   });
 
-  // If form validation fails, return errors early. Otherwise, continue.
+// If form validation fails, return errors early. Otherwise, continue.
+// If form validation fails, return errors early. Otherwise, continue.
+// If form validation fails, return errors early. Otherwise, continue.
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
@@ -188,16 +202,21 @@ export async function createItem(list_id: string, prevState: ItemState, formData
     };
   }
 
-  // Prepare data for insertion into the database
+// Prepare data for insertion into the database
   const { name, is_checked, assigned_to } = validatedFields.data;
   try {
-    await sql`INSERT INTO items (name, list_id, is_checked, assigned_to)
-      VALUES (${name}, ${list_id}, ${is_checked}, ${assigned_to})`;
+    await database.insert(items).values({
+      name,
+      listId: parseInt(list_id),
+      isChecked: is_checked,
+      assignedTo: assigned_to ? parseInt(assigned_to) : null
+    });
+
     revalidatePath(`/notebook/items/${list_id}`);
-    return { message: "Form submitted" }; // or some relevant message
+    return { message: "Form submitted" };
   }
   catch (error) {
-    return { message: 'Database Error: Failed to Create Item.', };
+    return { message: 'Database Error: Failed to Create Item.' };
   }
 }
 
@@ -208,42 +227,37 @@ export async function createUser(prevState: UserState, formData: FormData) {
     password: formData.get('password') || null
   });
 
-  // If form validation fails, return errors early. Otherwise, continue.
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing Fields. Failed to create item.',
+      message: 'Missing Fields. Failed to create user.',
     };
   }
 
-  // Prepare data for insertion into the database
+// Prepare data for insertion into the database
   const { name, email, password } = validatedFields.data;
-  // Hash the password before storing it in the database
-  let hashedPassword = null;
-  if (password !== null) {
-    hashedPassword = await bcrypt.hash(password!, 10);
-  }
+  const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
 
   try {
-    // Insert the user into the database
-    await sql`INSERT INTO users (name, email, password)
-      VALUES (${name}, ${email}, ${hashedPassword})`;
-    //return { message: "Form submitted" }; // or some relevant message
-  }
-  catch (error) {
-    return { message: 'Database Error: Failed to Create User.', };
+    await database.insert(users).values({
+      name,
+      email,
+      password: hashedPassword
+    });
+  } catch (error) {
+    return { message: 'Database Error: Failed to Create User.' };
   }
 }
 
 export async function createUserAndRedirectToLogin(prevState: UserState, formData: FormData) {
-  // Validate the form data using zod (assuming CreateUser is a Zod schema)
+// Validate the form data using zod (assuming CreateUser is a Zod schema)
   const validatedFields = CreateUser.safeParse({
     name: formData.get('name'),
     email: formData.get('email'),
     password: formData.get('password') || null
   });
 
-  // If validation fails, return early with errors
+// If validation fails, return early with errors
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
@@ -254,38 +268,37 @@ export async function createUserAndRedirectToLogin(prevState: UserState, formDat
   const { name, email, password } = validatedFields.data;
 
   try {
-    // Hash the password before storing it in the database
-    let hashedPassword = null;
-    if (password !== null) {
-      hashedPassword = await bcrypt.hash(password!, 10);
-    }
+    const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
 
-    let user: any = await getUser(email);
-    if (user) {
+    const existingUser = await database
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .then(rows => rows[0]);
+
+    if (existingUser) {
       return { message: `User with email ${email} already registered! Pick another email!` };
     }
-    // Insert the user into the database
-    await sql`
-      INSERT INTO users (name, email, password)
-      VALUES (${name}, ${email}, ${hashedPassword})
-    `;
+
+    await database.insert(users).values({
+      name,
+      email,
+      password: hashedPassword
+    });
   } catch (error) {
     console.error('Database Error:', error);
     return { message: 'Database Error: Failed to Create User.' };
   }
-  // Redirect to the login page upon successful registration
+// Redirect to the login page upon successful registration  
   redirect('/login'); // Redirects to the login page after user creation
 }
 
 export async function favoriteList(prevState: FavoriteState, formData: FormData) {
-  console.log('formData', formData);
-  // Validate the form data using zod (assuming CreateUser is a Zod schema)
   const validatedFields = CreateFavorite.safeParse({
     list_id: formData.get('list_id'),
     user_id: formData.get('user_id')
   });
 
-  // If validation fails, return early with errors
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
@@ -295,23 +308,30 @@ export async function favoriteList(prevState: FavoriteState, formData: FormData)
 
   const { list_id, user_id } = validatedFields.data;
   try {
-    await sql`INSERT INTO favorites (user_id, list_id)
-      VALUES (${user_id}, ${list_id})`;
+    await database.insert(favorites).values({
+      userId: parseInt(user_id),
+      listId: parseInt(list_id)
+    });
+
     revalidatePath('/notebook');
     revalidatePath('/notebook/saved');
-    return { message: "Form submitted" }; // or some relevant message
-  }
-  catch (error) {
-    return { message: 'Database Error: Failed to favorite list.', };
+    return { message: "Form submitted" };
+  } catch (error) {
+    return { message: 'Database Error: Failed to favorite list.' };
   }
 }
 
 export async function unFavoriteList(user_id: string, list_id: string) {
   try {
-    await sql`DELETE FROM favorites WHERE list_id = ${list_id} AND user_id = ${user_id}`;
-    //return { message: 'diddy', };
-  }
-  catch (error) {
+    await database
+      .delete(favorites)
+      .where(
+        and(
+          eq(favorites.listId, parseInt(list_id)),
+          eq(favorites.userId, parseInt(user_id))
+        )
+      );
+  } catch (error) {
     console.log('Database Error: Failed to unfavorite list.');
   }
   revalidatePath('/notebook');
@@ -328,7 +348,7 @@ export async function updateList(id: string, prevState: State, formData: FormDat
     description: formData.get('description')
   });
 
-  // If form validation fails, return errors early. Otherwise, continue.
+// If form validation fails, return errors early. Otherwise, continue.
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
@@ -336,17 +356,17 @@ export async function updateList(id: string, prevState: State, formData: FormDat
     };
   }
 
-  // Prepare data for insertion into the database
+// Prepare data for insertion into the database
   const { name, description } = validatedFields.data;
 
   try {
-    await sql`
-    UPDATE lists
-    SET name = ${name}, description = ${description} WHERE id = ${id}`;
-    //return { message: "Form submitted" }; // or some relevant message
+    await database
+      .update(lists)
+      .set({ name, description })
+      .where(eq(lists.id, parseInt(id)));
   }
   catch (error) {
-    return { message: 'Database Error: Failed to Update List.', };
+    return { message: 'Database Error: Failed to Update List.' };
   }
   revalidatePath('/notebook');
   redirect('/notebook');
@@ -355,7 +375,7 @@ export async function updateList(id: string, prevState: State, formData: FormDat
 export async function updateItem(id: string, list_id: string, prevState: ItemState, formData: FormData) {
   const validatedFields = UpdateItem.safeParse({
     name: formData.get('name'),
-    is_checked: formData.get('is_checked') === 'on' ? true : false,
+    is_checked: formData.get('is_checked') === 'on',
     assigned_to: formData.get('assigned_to')
   });
 
@@ -371,11 +391,17 @@ export async function updateItem(id: string, list_id: string, prevState: ItemSta
   const { name, is_checked, assigned_to } = validatedFields.data;
 
   try {
-    await sql`UPDATE items
-      SET name = ${name}, is_checked = ${is_checked}, assigned_to = ${assigned_to}
-      WHERE id = ${id}`;
+    await database
+      .update(items)
+      .set({
+        name,
+        isChecked: is_checked,
+        assignedTo: assigned_to ? parseInt(assigned_to) : null
+      })
+      .where(eq(items.id, parseInt(id)));
+
     revalidatePath(`/notebook/items/${list_id}`);
-    return { message: "Form submitted" }; // or some relevant message
+    return { message: "Form submitted" };
   }
   catch (error) {
     return { message: 'Database Error: Failed to Update Item.', };
@@ -385,37 +411,41 @@ export async function updateItem(id: string, list_id: string, prevState: ItemSta
 
 export async function checkItem(id: string, list_id: string) {
   try {
-    await sql`UPDATE items
-  SET is_checked = NOT is_checked
-  WHERE id = ${id}`;
+    await database
+      .update(items)
+      .set({
+        isChecked: sql`NOT ${items.isChecked}`
+      })
+      .where(eq(items.id, parseInt(id)));
   }
   catch (error) {
-    return { message: 'Database Error: Failed to check item.', };
+    return { message: 'Database Error: Failed to check item.' };
   }
   revalidatePath(`/notebook/items/${list_id}`);
-  //redirect(`/notebook/items/${list_id}`);
 }
 
 export async function deleteList(id: string) {
   // throw new Error('Failed to Delete Invoice');
   try {
-    await sql`DELETE FROM lists WHERE id = ${id}`;
-    //return { message: 'Deleted List.' };
+    await database
+      .delete(lists)
+      .where(eq(lists.id, parseInt(id)));
+
+    revalidatePath('/notebook');
+    revalidatePath('/notebook/saved');
   }
   catch (error) {
     console.log("Database Error: Failed to Delete List", error);
     console.log('Database Error: Failed to Delete List.');
   }
-  revalidatePath('/notebook');
-  revalidatePath('/notebook/saved');
 }
 
 export async function deleteItem(id: string, list_id: string) {
   try {
-    await sql`DELETE FROM items WHERE id = ${id}`;
-    //return { message: 'Deleted Item.' };
-  }
-  catch (error) {
+    await database
+      .delete(items)
+      .where(eq(items.id, parseInt(id)));
+  } catch (error) {
     console.log('Database Error: Failed to Delete Item.');
   }
   revalidatePath(`/notebook/items/${list_id}`);
@@ -452,28 +482,34 @@ export async function copyList(list_id: string, formData: FormData) {
 
   try {
     // Get original list details
-    const originalList = await sql`
-      SELECT name, description FROM lists WHERE id = ${list_id}
-    `;
+    const originalList = await database
+      .select({
+        name: lists.name,
+        description: lists.description
+      })
+      .from(lists)
+      .where(eq(lists.id, parseInt(list_id)))
+      .then(rows => rows[0]);
 
     // Create new list with "(Copy)" suffix
-    const newList = await sql`
-      INSERT INTO lists (name, description, user_id)
-      VALUES (
-        ${originalList.rows[0].name + ' (Copy)'}, 
-        ${originalList.rows[0].description},
-        ${user_id}
-      )
-      RETURNING id
-    `;
+    const [newList] = await database
+      .insert(lists)
+      .values({
+        name: originalList.name + ' (Copy)',
+        description: originalList.description,
+        userId: parseInt(user_id)
+      })
+      .returning();
 
     // Copy all items from original list
-    await sql`
-      INSERT INTO items (name, list_id, is_checked, assigned_to)
-      SELECT name, ${newList.rows[0].id}, false, ${user_id}
-      FROM items 
-      WHERE list_id = ${list_id}
-    `;
+    await database
+      .insert(items)
+      .values({
+        name: sql`(SELECT name FROM ${items} WHERE list_id = ${parseInt(list_id)})`,
+        listId: newList.id,
+        isChecked: false,
+        assignedTo: parseInt(user_id)
+      });
 
     revalidatePath('/notebook');
   } catch (error) {
@@ -481,11 +517,14 @@ export async function copyList(list_id: string, formData: FormData) {
     throw new Error('Failed to copy list');
   }
 }
+
 export async function updateItemListId(list_id: string, item_id: string) {
   try {
-    await sql`UPDATE items SET list_id = ${list_id} WHERE id = ${item_id}`;
-  }
-  catch (error) {
+    await database
+      .update(items)
+      .set({ listId: parseInt(list_id) })
+      .where(eq(items.id, parseInt(item_id)));
+  } catch (error) {
     console.log("updateItemListId error", error);
     throw new Error('Failed to update item list id');
   }
@@ -493,28 +532,26 @@ export async function updateItemListId(list_id: string, item_id: string) {
 
 export async function deleteListWithoutRevalidation(list_id: string) {
   try {
-    await sql`DELETE FROM lists WHERE id = ${list_id}`;
-  }
-  catch (error) {
+    await database
+      .delete(lists)
+      .where(eq(lists.id, parseInt(list_id)));
+  } catch (error) {
     console.log('Database Error: Failed to Delete List.');
     throw new Error('Failed to delete list');
   }
-
 }
 
 export async function deleteItemWithoutRevalidation(item_id: string) {
   try {
-    await sql`DELETE FROM items WHERE id = ${item_id}`;
-  }
-  catch (error) {
+    await database
+      .delete(items)
+      .where(eq(items.id, parseInt(item_id)));
+  } catch (error) {
     console.log('Database Error: Failed to Delete Item.');
     throw new Error('Failed to delete item');
   }
 }
 
-{
-
-}
 export async function mergeLists(user_id: string, prevState: State, formData: FormData) {
   try {
     const list_id_1 = formData.get('list1');
@@ -528,11 +565,13 @@ export async function mergeLists(user_id: string, prevState: State, formData: Fo
       return { message: 'Cannot merge the same list.' };
     }
 
+    // Get list names and items
     const list1Name = await fetchNameOfList(list_id_1);
     const list2Name = await fetchNameOfList(list_id_2);
     const items_1: ItemForm[] = await fetchItems(list_id_1);
     const items_2: ItemForm[] = await fetchItems(list_id_2);
 
+    // Track unique and duplicate items
     const uniqueItemsFromList1 = new Set<string>();
     const intersectionOfItems = new Set<string>();
 
@@ -543,69 +582,92 @@ export async function mergeLists(user_id: string, prevState: State, formData: Fo
       }
     });
 
-    const merged_list = await sql`
-      INSERT INTO lists (name, description, user_id)
-      VALUES (${list1Name.name + ' & ' + list2Name.name}, ${'Merged list of ' + list_id_1 + ' & ' + list_id_2}, ${user_id})
-      RETURNING id
-    `;
+    // Create new merged list
+    const [mergedList] = await database
+      .insert(lists)
+      .values({
+        name: `${list1Name.name} & ${list2Name.name}`,
+        description: `Merged list of ${list_id_1} & ${list_id_2}`,
+        userId: parseInt(user_id)
+      })
+      .returning();
 
-    // Handle items for merged list
+    // Update items from list 1
     await Promise.all(
       items_1.map(async (item) => {
         if (!intersectionOfItems.has(item.name)) {
-          await updateItemListId(merged_list.rows[0].id, item.id);
+          await database
+            .update(items)
+            .set({ listId: mergedList.id })
+            .where(eq(items.id, item.id));
         } else {
-          await deleteItemWithoutRevalidation(item.id);
+          await database
+            .delete(items)
+            .where(eq(items.id, item.id));
         }
       })
     );
 
+    // Update items from list 2
     await Promise.all(
       items_2.map(async (item) => {
         if (!intersectionOfItems.has(item.name)) {
-          await updateItemListId(merged_list.rows[0].id, item.id);
+          await database
+            .update(items)
+            .set({ listId: mergedList.id })
+            .where(eq(items.id, item.id));
         } else {
-          await deleteItemWithoutRevalidation(item.id);
+          await database
+            .delete(items)
+            .where(eq(items.id, item.id));
         }
       })
     );
 
     // Insert intersection items into merged list
-    await Promise.all(
-      Array.from(intersectionOfItems).map(async (itemName) => {
-        await sql`
-          INSERT INTO items (name, list_id, is_checked, assigned_to)
-          VALUES (${itemName}, ${merged_list.rows[0].id}, ${false}, ${user_id})
-        `;
-      })
-    );
+    await database
+      .insert(items)
+      .values(
+        Array.from(intersectionOfItems).map(itemName => ({
+          name: itemName,
+          listId: mergedList.id,
+          isChecked: false,
+          assignedTo: parseInt(user_id)
+        }))
+      );
 
-    // Handle shared users for merged list
-    const sharedUsers = await sql`
-      SELECT DISTINCT shared_with_id
-      FROM shared_lists
-      WHERE list_id = ${list_id_1} OR list_id = ${list_id_2}
-    `;
+    // Get shared users from both lists
+    const sharedUsers = await database
+      .select({ sharedWithId: sharedLists.sharedWithId })
+      .from(sharedLists)
+      .where(
+        or(
+          eq(sharedLists.listId, parseInt(list_id_1)),
+          eq(sharedLists.listId, parseInt(list_id_2))
+        )
+      )
+      .groupBy(sharedLists.sharedWithId);
+
+    // Share merged list with users
+    await database
+      .insert(sharedLists)
+      .values(
+        sharedUsers.map(user => ({
+          ownerId: parseInt(user_id),
+          sharedWithId: user.sharedWithId,
+          listId: mergedList.id
+        }))
+      )
+      .onConflictDoNothing();
 
     // Delete original lists
-    await deleteListWithoutRevalidation(list_id_1);
-    await deleteListWithoutRevalidation(list_id_2);
-    
-
-    await Promise.all(
-      sharedUsers.rows.map(async (user) => {
-        await sql`
-        INSERT INTO shared_lists (owner_id, shared_with_id, list_id)
-        VALUES (${user_id}, ${user.shared_with_id}, ${merged_list.rows[0].id})
-        ON CONFLICT (list_id, shared_with_id) DO NOTHING
-        `;
-      })
-    );
-
+    await Promise.all([
+      deleteListWithoutRevalidation(list_id_1),
+      deleteListWithoutRevalidation(list_id_2)
+    ]);
 
     revalidatePath('/notebook');
     revalidatePath('/notebook/saved');
-
     return { message: 'Lists merged successfully.' };
   } catch (error) {
     console.error('Error merging lists:', error);
@@ -614,5 +676,5 @@ export async function mergeLists(user_id: string, prevState: State, formData: Fo
 }
 
 
-  
+
 
