@@ -19,7 +19,7 @@ const EditItemForm = ({
   currentUserId: string;
 }) => {
   const initialState: ItemState = { errors: {}, message: null };
-  const updateItemWithId = updateItem.bind(null, item.id, item.list_id);
+  const updateItemWithId = updateItem.bind(null, item.id.toString(), item.listId.toString());
   const [state, formAction] = useActionState(updateItemWithId, initialState);
   console.log("item is ", item);
   return (
@@ -43,15 +43,15 @@ const EditItemForm = ({
       <div className="flex flex-col">
         <select
           name="assigned_to"
-          defaultValue={item.assigned_to}
+          defaultValue={item.assignedTo?.toString() || currentUserId}
           className="w-full px-3 py-2 border rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="" disabled>
                 Select a user
           </option>
-          {listUsers.map((user) => ((
-              <option key={user.id} value={user.id}>
-                {user.id === currentUserId ? 'You' : user.name}
+          {listUsers.map((user, index) => ((
+              <option key={index} value={user.id?.toString() || ""}>
+                {user.id?.toString() === currentUserId ? 'You' : user.name || 'Unknown user'}
               </option>
             )
           ))}
@@ -63,7 +63,7 @@ const EditItemForm = ({
           type="checkbox"
           name="is_checked"
           id="is_checked"
-          defaultChecked={item.is_checked}
+          defaultChecked={item.isChecked!}
           className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
         />
         <label htmlFor="is_checked" className="ml-2 text-sm text-gray-700">
@@ -74,7 +74,7 @@ const EditItemForm = ({
       <button
         type="submit"
         className={`w-24 flex items-center justify-center p-2 border rounded hover:bg-orange-100 
-          ${item.is_checked ? 'text-white border-white hover:text-orange-500' : 'text-orange-500 border-orange-500'}`}
+          ${item.isChecked ? 'text-white border-white hover:text-orange-500' : 'text-orange-500 border-orange-500'}`}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

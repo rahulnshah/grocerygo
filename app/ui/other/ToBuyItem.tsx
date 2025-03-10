@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react';
 import { auth } from '@/auth';
 
 const ToBuyItem = async ({ item }: { item: ItemForm }) => {
-  const listUsers = await getListUsers(item.list_id);
+  const listUsers = await getListUsers(item.listId.toString());
   const session = await auth();
   
   return (
@@ -20,7 +20,7 @@ const ToBuyItem = async ({ item }: { item: ItemForm }) => {
         />
       </div>
       <div className="flex justify-between items-center mt-auto">
-        <DeleteItem id={item.id} list_id={item.list_id} />
+        <DeleteItem id={item.id.toString()} list_id={item.listId.toString()} />
       </div>
     </div>
   );

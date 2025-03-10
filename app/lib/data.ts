@@ -1,6 +1,6 @@
 'use server';
 import { drizzle } from 'drizzle-orm/neon-http';
-import { and, eq, ilike, ne, notInArray, count, desc, or, sql } from 'drizzle-orm';
+import { and, eq, ilike, ne, notInArray, count, desc, or } from 'drizzle-orm';
 import { lists, items, users, sharedLists, favorites } from './schema';
 import {
   Item,
@@ -96,7 +96,7 @@ export async function fetchSharedLists(owner_id: string) {
 
 export async function getListSharedUsers(list_id: string, owner_id: string) {
   try {
-    const result: SharedList = await database
+    const result = await database
       .select({
         id: users.id,
         name: users.name,
@@ -147,7 +147,7 @@ export async function fetchItems(list_id: string) {
         id: items.id,
         listId: items.listId,
         name: items.name,
-        isChecked: sql<boolean>`COALESCE(${items.isChecked}, false)`,
+        isChecked: items.isChecked,
         assignedTo: items.assignedTo,
         assignedToName: users.name,
       })
@@ -266,23 +266,13 @@ export async function getListUsers(list_id: string) {
         name: users.name,
         email: users.email,
         createdAt: users.createdAt,
-        isOwner: sql<boolean>`CASE 
-          WHEN ${lists.userId} = ${users.id} THEN true
-          ELSE false
-        END`
+        password: users.password
       })
       .from(lists)
       .leftJoin(sharedLists, eq(lists.id, sharedLists.listId))
-      .leftJoin(
-        users,
-        or(
-          eq(sharedLists.sharedWithId, users.id),
-          eq(lists.userId, users.id)
-        )
-      )
+      .leftJoin(users, eq(sharedLists.sharedWithId, users.id)) // Only shared users
       .where(eq(lists.id, parseInt(list_id)))
-      .groupBy(users.id, lists.userId);
-
+      .groupBy(users.id, users.name, users.email, users.createdAt);
     return result;
   } catch (error) {
     console.error('Database Error:', error);

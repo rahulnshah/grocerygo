@@ -1,7 +1,7 @@
 // This file contains type definitions based on the Drizzle schema
 
 export type User = {
-    id: number;
+    id: number | null;
     email: string | null;
     password: string | null;
     name: string | null;
@@ -53,6 +53,7 @@ export type ItemWithAssignee = Item & {
 
 // Form submission types
 export type ListForm = {
+    id: number;
     name: string;
     description: string | null;
 };
@@ -61,7 +62,7 @@ export type ItemForm = {
     id: number;
   listId: number;
   name: string;
-  isChecked: boolean;
+  isChecked: boolean | null;
   assignedTo: number | null;
   assignedToName: string | null;
 };
