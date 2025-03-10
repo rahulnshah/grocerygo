@@ -49,9 +49,9 @@ const EditItemForm = ({
           <option value="" disabled>
                 Select a user
           </option>
-          {listUsers.map((user, index) => ((
-              <option key={index} value={user.id?.toString() || ""}>
-                {user.id?.toString() === currentUserId ? 'You' : user.name || 'Unknown user'}
+          {listUsers.map((user) => ((
+              <option key={user.id?.toString()} value={user.id?.toString() || currentUserId}>
+                {user.id?.toString() === currentUserId ? 'You' : user.name}
               </option>
             )
           ))}

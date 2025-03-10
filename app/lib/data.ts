@@ -1,6 +1,6 @@
 'use server';
 import { drizzle } from 'drizzle-orm/neon-http';
-import { and, eq, ilike, ne, notInArray, count, desc, or } from 'drizzle-orm';
+import { and, eq, ilike, ne, notInArray, count, desc, or, isNull } from 'drizzle-orm';
 import { lists, items, users, sharedLists, favorites } from './schema';
 import {
   Item,
@@ -259,20 +259,27 @@ export async function getUser(email: string) {
 
 export async function getListUsers(list_id: string) {
   noStore();
+  // includes the owner of the list by default
   try {
-    const result: User[] = await database
-      .select({
-        id: users.id,
-        name: users.name,
-        email: users.email,
-        createdAt: users.createdAt,
-        password: users.password
-      })
-      .from(lists)
-      .leftJoin(sharedLists, eq(lists.id, sharedLists.listId))
-      .leftJoin(users, eq(sharedLists.sharedWithId, users.id)) // Only shared users
-      .where(eq(lists.id, parseInt(list_id)))
-      .groupBy(users.id, users.name, users.email, users.createdAt);
+    const result = await database
+  .select({
+    id: users.id,
+    name: users.name,
+    email: users.email,
+    createdAt: users.createdAt,
+    password: users.password
+  })
+  .from(lists)
+  .leftJoin(sharedLists, eq(lists.id, sharedLists.listId))
+  .leftJoin(
+    users,
+    or(
+      eq(sharedLists.sharedWithId, users.id),
+      and(isNull(sharedLists.listId), eq(lists.userId, users.id))
+    )
+  )
+  .where(eq(lists.id, parseInt(list_id)))
+  .groupBy(users.id, users.name, users.email, users.createdAt);
     return result;
   } catch (error) {
     console.error('Database Error:', error);

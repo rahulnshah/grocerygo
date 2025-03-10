@@ -11,7 +11,7 @@ const ToBuyItem = async ({ item }: { item: ItemForm }) => {
   const session = await auth();
   
   return (
-    <div className={`w-full rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 ${item.is_checked ? 'bg-orange-500' : 'bg-white'}`}>
+    <div className={`w-full rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 ${item.isChecked ? 'bg-orange-500' : 'bg-white'}`}>
       <div className="flex-1">
         <EditItemForm 
           item={item} 
