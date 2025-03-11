@@ -121,13 +121,12 @@ export async function shareList(listId: string, formData: FormData) {
       sharedWithId: parseInt(userId),
       listId: parseInt(listId)
     });
-
-    revalidatePath(`/notebook/lists/share-modal/${listId}`);
-    revalidatePath('/notebook/shared');
   } catch (error) {
     console.log("error", error);
     throw new Error('Failed to share list');
   }
+  revalidatePath(`/notebook/lists/share-modal/${listId}`);
+  revalidatePath('/notebook/shared');
 }
 
 export async function unshareList(listId: string, formData: FormData) {
@@ -145,12 +144,11 @@ export async function unshareList(listId: string, formData: FormData) {
           eq(sharedLists.sharedWithId, parseInt(userId))
         )
       );
-
-    revalidatePath(`/notebook/lists/share-modal/${listId}`);
-    revalidatePath('/notebook/shared');
   } catch (error) {
     throw new Error('Failed to unshare list');
   }
+  revalidatePath(`/notebook/lists/share-modal/${listId}`);
+  revalidatePath('/notebook/shared');
 }
 
 export async function createList(user_id: string, prevState: State, formData: FormData) {
@@ -176,13 +174,12 @@ export async function createList(user_id: string, prevState: State, formData: Fo
       name,
       description
     });
-
-    revalidatePath('/notebook');
-    return { message: "Form submitted" };
+    // return { message: "Form submitted" };
   }
   catch (error) {
     return { message: 'Database Error: Failed to Create List.', };
   }
+  revalidatePath('/notebook');
 }
 
 export async function createItem(list_id: string, prevState: ItemState, formData: FormData) {
@@ -211,13 +208,12 @@ export async function createItem(list_id: string, prevState: ItemState, formData
       isChecked: is_checked,
       assignedTo: assigned_to ? parseInt(assigned_to) : null
     });
-
-    revalidatePath(`/notebook/items/${list_id}`);
-    return { message: "Form submitted" };
+    // return { message: "Form submitted" };
   }
   catch (error) {
     return { message: 'Database Error: Failed to Create Item.' };
   }
+  revalidatePath(`/notebook/items/${list_id}`);
 }
 
 export async function createUser(prevState: UserState, formData: FormData) {
@@ -312,13 +308,12 @@ export async function favoriteList(prevState: FavoriteState, formData: FormData)
       userId: parseInt(user_id),
       listId: parseInt(list_id)
     });
-
-    revalidatePath('/notebook');
-    revalidatePath('/notebook/saved');
-    return { message: "Form submitted" };
+    //return { message: "Form submitted" };
   } catch (error) {
     return { message: 'Database Error: Failed to favorite list.' };
   }
+  revalidatePath('/notebook');
+  revalidatePath('/notebook/saved');
 }
 
 export async function unFavoriteList(user_id: string, list_id: string) {
@@ -399,14 +394,13 @@ export async function updateItem(id: string, list_id: string, prevState: ItemSta
         assignedTo: assigned_to ? parseInt(assigned_to) : null
       })
       .where(eq(items.id, parseInt(id)));
-    revalidatePath(`/notebook`);
-    revalidatePath(`/notebook/items/${list_id}`);
-    return { message: "Form submitted" };
+    //return { message: "Form submitted" };
   }
   catch (error) {
     return { message: 'Database Error: Failed to Update Item.', };
   }
-
+  revalidatePath(`/notebook`);
+  revalidatePath(`/notebook/items/${list_id}`);
 }
 
 export async function checkItem(id: string, list_id: string) {
@@ -430,14 +424,13 @@ export async function deleteList(id: string) {
     await database
       .delete(lists)
       .where(eq(lists.id, parseInt(id)));
-
-    revalidatePath('/notebook');
-    revalidatePath('/notebook/saved');
   }
   catch (error) {
     console.log("Database Error: Failed to Delete List", error);
     console.log('Database Error: Failed to Delete List.');
   }
+  revalidatePath('/notebook');
+  revalidatePath('/notebook/saved');
 }
 
 export async function deleteItem(id: string, list_id: string) {
@@ -518,11 +511,11 @@ export async function copyList(list_id: string, formData: FormData) {
           assignedTo: parseInt(user_id)
         }))
       );
-    revalidatePath('/notebook');
   } catch (error) {
     console.log("copyList error", error);
     throw new Error('Failed to copy list');
   }
+  revalidatePath('/notebook');
 }
 
 export async function updateItemListId(list_id: string, item_id: string) {
@@ -672,7 +665,6 @@ export async function mergeLists(user_id: string, prevState: State, formData: Fo
       deleteListWithoutRevalidation(list_id_1),
       deleteListWithoutRevalidation(list_id_2)
     ]);
-
     revalidatePath('/notebook');
     revalidatePath('/notebook/saved');
     return { message: 'Lists merged successfully.' };
