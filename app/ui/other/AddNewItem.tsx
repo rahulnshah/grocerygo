@@ -8,7 +8,7 @@ const AddNewItem = ({ list_id, currentUserId, listUsers, list_name }: { list_id:
   const initialState: ItemState = { message: null, errors: {} };
   const createItemWithListId = createItem.bind(null, list_id);
   const [state, formAction] = useActionState(createItemWithListId, initialState);
-
+  console.log("listUsers",listUsers)
   return (
     <form action={formAction}>
       <div className="flex flex-col w-72 p-4 rounded-lg shadow-lg bg-white relative">
@@ -48,11 +48,11 @@ const AddNewItem = ({ list_id, currentUserId, listUsers, list_name }: { list_id:
           <option value="" disabled>
             Select a user
           </option>
-          {listUsers.map((user) => ((
+          {listUsers.map((user) => (
             <option key={user.id} value={user.id?.toString()}>
               {user.id?.toString() === currentUserId ? 'You' : user.name}
             </option>
-          )))}
+          ))}
         </select>
       </div>
 

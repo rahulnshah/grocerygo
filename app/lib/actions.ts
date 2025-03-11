@@ -145,7 +145,7 @@ export async function unshareList(listId: string, formData: FormData) {
           eq(sharedLists.sharedWithId, parseInt(userId))
         )
       );
-      
+
     revalidatePath(`/notebook/lists/share-modal/${listId}`);
     revalidatePath('/notebook/shared');
   } catch (error) {
@@ -192,9 +192,9 @@ export async function createItem(list_id: string, prevState: ItemState, formData
     assigned_to: formData.get('assigned_to')
   });
 
-// If form validation fails, return errors early. Otherwise, continue.
-// If form validation fails, return errors early. Otherwise, continue.
-// If form validation fails, return errors early. Otherwise, continue.
+  // If form validation fails, return errors early. Otherwise, continue.
+  // If form validation fails, return errors early. Otherwise, continue.
+  // If form validation fails, return errors early. Otherwise, continue.
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
@@ -202,7 +202,7 @@ export async function createItem(list_id: string, prevState: ItemState, formData
     };
   }
 
-// Prepare data for insertion into the database
+  // Prepare data for insertion into the database
   const { name, is_checked, assigned_to } = validatedFields.data;
   try {
     await database.insert(items).values({
@@ -234,7 +234,7 @@ export async function createUser(prevState: UserState, formData: FormData) {
     };
   }
 
-// Prepare data for insertion into the database
+  // Prepare data for insertion into the database
   const { name, email, password } = validatedFields.data;
   const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
 
@@ -250,14 +250,14 @@ export async function createUser(prevState: UserState, formData: FormData) {
 }
 
 export async function createUserAndRedirectToLogin(prevState: UserState, formData: FormData) {
-// Validate the form data using zod (assuming CreateUser is a Zod schema)
+  // Validate the form data using zod (assuming CreateUser is a Zod schema)
   const validatedFields = CreateUser.safeParse({
     name: formData.get('name'),
     email: formData.get('email'),
     password: formData.get('password') || null
   });
 
-// If validation fails, return early with errors
+  // If validation fails, return early with errors
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
@@ -289,7 +289,7 @@ export async function createUserAndRedirectToLogin(prevState: UserState, formDat
     console.error('Database Error:', error);
     return { message: 'Database Error: Failed to Create User.' };
   }
-// Redirect to the login page upon successful registration  
+  // Redirect to the login page upon successful registration  
   redirect('/login'); // Redirects to the login page after user creation
 }
 
@@ -348,7 +348,7 @@ export async function updateList(id: string, prevState: State, formData: FormDat
     description: formData.get('description')
   });
 
-// If form validation fails, return errors early. Otherwise, continue.
+  // If form validation fails, return errors early. Otherwise, continue.
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
@@ -356,7 +356,7 @@ export async function updateList(id: string, prevState: State, formData: FormDat
     };
   }
 
-// Prepare data for insertion into the database
+  // Prepare data for insertion into the database
   const { name, description } = validatedFields.data;
 
   try {
@@ -483,34 +483,41 @@ export async function copyList(list_id: string, formData: FormData) {
   try {
     // Get original list details
     const originalList = await database
-      .select({
-        name: lists.name,
-        description: lists.description
-      })
+      .select({ name: lists.name, description: lists.description })
       .from(lists)
       .where(eq(lists.id, parseInt(list_id)))
-      .then(rows => rows[0]);
+      .limit(1);
+
+    if (!originalList.length) {
+      throw new Error("List not found");
+    }
+
+    // get all the items from the original list
+    const originalItems = await fetchItems(list_id);
+
+    const { name, description } = originalList[0];
 
     // Create new list with "(Copy)" suffix
     const [newList] = await database
       .insert(lists)
-      .values({
-        name: originalList.name + ' (Copy)',
-        description: originalList.description,
-        userId: parseInt(user_id)
-      })
-      .returning();
+      .values({ name: `${name} (Copy)`, description, userId: parseInt(user_id) })
+      .returning({ id: lists.id });
+
+    if (!newList) {
+      throw new Error("Failed to create new list");
+    }
 
     // Copy all items from original list
     await database
       .insert(items)
-      .values({
-        name: sql`(SELECT name FROM ${items} WHERE list_id = ${parseInt(list_id)})`,
-        listId: newList.id,
-        isChecked: false,
-        assignedTo: parseInt(user_id)
-      });
-
+      .values(
+        originalItems.map(item => ({
+          name: item.name,
+          listId: newList.id,
+          isChecked: item.isChecked,
+          assignedTo: parseInt(user_id)
+        }))
+      );
     revalidatePath('/notebook');
   } catch (error) {
     console.log("copyList error", error);

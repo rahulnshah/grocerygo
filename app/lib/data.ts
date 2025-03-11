@@ -259,27 +259,32 @@ export async function getUser(email: string) {
 
 export async function getListUsers(list_id: string) {
   noStore();
-  // includes the owner of the list by default
   try {
-    const result = await database
-  .select({
-    id: users.id,
-    name: users.name,
-    email: users.email,
-    createdAt: users.createdAt,
-    password: users.password
-  })
-  .from(lists)
-  .leftJoin(sharedLists, eq(lists.id, sharedLists.listId))
-  .leftJoin(
-    users,
-    or(
-      eq(sharedLists.sharedWithId, users.id),
-      and(isNull(sharedLists.listId), eq(lists.userId, users.id))
-    )
-  )
-  .where(eq(lists.id, parseInt(list_id)))
-  .groupBy(users.id, users.name, users.email, users.createdAt);
+    // get all users who have access to the list and the owner of the list as well
+    const result: User[] = await database
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        password: users.password,
+        createdAt: users.createdAt
+      })
+      .from(sharedLists)
+      .innerJoin(users, eq(sharedLists.sharedWithId, users.id))
+      .where(eq(sharedLists.listId, parseInt(list_id)))
+      .union(
+          database
+            .select({
+              id: users.id,
+              name: users.name,
+              email: users.email,
+              password: users.password,
+              createdAt: users.createdAt
+            })
+            .from(lists)
+            .innerJoin(users, eq(lists.userId, users.id))
+            .where(eq(lists.id, parseInt(list_id)))
+        );
     return result;
   } catch (error) {
     console.error('Database Error:', error);
