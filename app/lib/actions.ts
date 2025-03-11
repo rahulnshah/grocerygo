@@ -399,7 +399,7 @@ export async function updateItem(id: string, list_id: string, prevState: ItemSta
         assignedTo: assigned_to ? parseInt(assigned_to) : null
       })
       .where(eq(items.id, parseInt(id)));
-
+    revalidatePath(`/notebook`);
     revalidatePath(`/notebook/items/${list_id}`);
     return { message: "Form submitted" };
   }
