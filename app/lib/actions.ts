@@ -174,12 +174,12 @@ export async function createList(user_id: string, prevState: State, formData: Fo
       name,
       description
     });
-    // return { message: "Form submitted" };
+    revalidatePath('/notebook');
   }
   catch (error) {
     return { message: 'Database Error: Failed to Create List.', };
   }
-  revalidatePath('/notebook');
+  return { message: "Form submitted" };
 }
 
 export async function createItem(list_id: string, prevState: ItemState, formData: FormData) {
@@ -208,12 +208,12 @@ export async function createItem(list_id: string, prevState: ItemState, formData
       isChecked: is_checked,
       assignedTo: assigned_to ? parseInt(assigned_to) : null
     });
-    // return { message: "Form submitted" };
+    revalidatePath(`/notebook/items/${list_id}`);
   }
   catch (error) {
     return { message: 'Database Error: Failed to Create Item.' };
   }
-  revalidatePath(`/notebook/items/${list_id}`);
+  return { message: "Form submitted" };
 }
 
 export async function createUser(prevState: UserState, formData: FormData) {
@@ -308,12 +308,13 @@ export async function favoriteList(prevState: FavoriteState, formData: FormData)
       userId: parseInt(user_id),
       listId: parseInt(list_id)
     });
-    //return { message: "Form submitted" };
+
+    revalidatePath('/notebook');
+    revalidatePath('/notebook/saved');
   } catch (error) {
     return { message: 'Database Error: Failed to favorite list.' };
   }
-  revalidatePath('/notebook');
-  revalidatePath('/notebook/saved');
+  return { message: "Form submitted" };
 }
 
 export async function unFavoriteList(user_id: string, list_id: string) {
@@ -394,13 +395,13 @@ export async function updateItem(id: string, list_id: string, prevState: ItemSta
         assignedTo: assigned_to ? parseInt(assigned_to) : null
       })
       .where(eq(items.id, parseInt(id)));
-    //return { message: "Form submitted" };
+    revalidatePath(`/notebook`);
+    revalidatePath(`/notebook/items/${list_id}`);
   }
   catch (error) {
     return { message: 'Database Error: Failed to Update Item.', };
   }
-  revalidatePath(`/notebook`);
-  revalidatePath(`/notebook/items/${list_id}`);
+  return { message: "Form submitted" };
 }
 
 export async function checkItem(id: string, list_id: string) {
