@@ -9,7 +9,7 @@ import { drizzle } from 'drizzle-orm/neon-http';
 import { and, eq, sql, or } from 'drizzle-orm';
 import { lists, items, users, sharedLists, favorites } from './schema';
 import { fetchItems, getUser, fetchNameOfList } from './data';
-import { ItemForm } from './definitions';
+import { Item, ItemForm } from './definitions';
 
 const database = drizzle(process.env.DATABASE_URL!);
 
@@ -500,17 +500,19 @@ export async function copyList(list_id: string, formData: FormData) {
       throw new Error("Failed to create new list");
     }
 
+    let itemsToInsert : any[] = [];
+    originalItems.forEach(item => {
+      itemsToInsert.push({
+        name: item.name,
+        listId: newList.id,
+        isChecked: item.isChecked || false,
+        assignedTo: parseInt(user_id)
+      });
+    });
     // Copy all items from original list
     await database
       .insert(items)
-      .values(
-        originalItems.map(item => ({
-          name: item.name,
-          listId: newList.id,
-          isChecked: item.isChecked,
-          assignedTo: parseInt(user_id)
-        }))
-      );
+      .values(itemsToInsert);
   } catch (error) {
     console.log("copyList error", error);
     throw new Error('Failed to copy list');
