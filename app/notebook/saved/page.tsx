@@ -19,8 +19,8 @@ const SavedPage = async () => {
         <ListCard
           key={list.id}
           title={list.name}
-          description={list.description}
-          list_id={list.id}
+          description={list.description!}
+          list_id={list.id.toString()}
         />
         </Suspense>
       ))}

@@ -40,7 +40,7 @@ export function MailList({ list_title, id }: { list_title: string, id: string })
         items.forEach((item, index) => {
           const y = 30 + index * 10; // Adjust vertical spacing
           const start = 15; // the starting pt of each item name in pdf 
-          if (item.is_checked) {
+          if (item.isChecked) {
             // Draw a line over the text to create a strikethrough effect
             const textWidth = doc.getTextWidth(item.name);
             doc.text(item.name, start, y);

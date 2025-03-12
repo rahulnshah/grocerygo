@@ -1,76 +1,77 @@
-// This file contains type definitions for your data.
-// It describes the shape of the data, and what data type each property should accept.
-// For simplicity of teaching, we're manually defining these types.
-// However, these types are generated automatically if you're using an ORM such as Prisma.
-// Type for an item
-export type Item = {
-    id: string;
-    list_id: string;
-    name: string;
-    is_checked: boolean;
-    created_at: string;
-    updated_at: string;
-};
-
-// Type for a list
-export type List = {
-    id: string;
-    name: string;
-    user_id: string;
-    description: string;
-    created_at: string;
-    updated_at: string;
-};
-
-export type ListWithCounts = List & {
-    item_count: number;
-};
-
-// Type for the favorites relationship
-export type FavoriteList = {
-    id: string;
-    name: string;
-    description: string;
-    created_at: string;
-};
-
-export type Favorite = {
-    id: string;
-    user_id: string;
-    list_id: string;
-    created_at: string;
-};
-export type SharedWithIds = {
-    shared_with_id: string;
-};
-
-export type ListForm = {
-    id: string;
-    name: string;
-    description: string;
-};
-
-export type ItemForm = {
-    id: string;
-    list_id: string;
-    name: string;
-    is_checked: boolean;
-    assigned_to: string;
-    assigned_to_name?: string;
-};
+// This file contains type definitions based on the Drizzle schema
 
 export type User = {
-    id: string;
+    id: number | null;
+    email: string | null;
+    password: string | null;
+    name: string | null;
+    createdAt: Date | null;
+};
+
+export type List = {
+    id: number;
+    userId: number;
     name: string;
-    email: string;
-    password?: string;
-    created_at: string;
+    description: string | null;
+    createdAt: Date | null;
+    updatedAt: Date | null;
+};
+
+export type Item = {
+    id: number;
+    listId: number;
+    name: string;
+    isChecked: boolean;
+    assignedTo: number | null;
+    createdAt: Date | null;
+    updatedAt: Date | null;
 };
 
 export type SharedList = {
-    id: string;
-    list_id: string;
-    shared_with_id: string;
-    created_at: string;
+    id: number;
+    ownerId: number;
+    sharedWithId: number;
+    listId: number;
+    sharedAt: Date | null;
 };
-  
+
+export type Favorite = {
+    id: number;
+    userId: number;
+    listId: number;
+    createdAt: Date | null;
+};
+
+// Composite and derived types
+export type ListWithCounts = List & {
+    itemCount: number;
+};
+
+export type ItemWithAssignee = Item & {
+    assignedToName?: string | undefined;
+};
+
+// Form submission types
+export type ListForm = {
+    id: number;
+    name: string;
+    description: string | null;
+};
+
+export type ItemForm = {
+    id: number;
+  listId: number;
+  name: string;
+  isChecked: boolean | null;
+  assignedTo: number | null;
+  assignedToName: string | null;
+};
+
+// Helper types
+export type SharedWithIds = {
+    sharedWithId: number;
+};
+
+export type FavoriteList = Omit<List, 'userId' | 'updatedAt' | 'createdAt'> & {
+    listId: number;
+};

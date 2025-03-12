@@ -25,10 +25,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     if (passwordsMatch) {
                        // console.log('Credentials are valid', user);
                         return{
-                            id: user.id,
-                            name: user.name,
-                            email: user.email,
-                            created_at: user.created_at,
+                            id: user.id!.toString(),
+                            name: user.name!,
+                            email: user.email!,
+                            created_at: user.createdAt!.toISOString(),
                         };
                     }
                 }
@@ -65,9 +65,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 // return all the stuff for the session for that same user
                 return {
                     ...token,
-                    id: existingUser.id,
+                    id: existingUser.id?.toString(),
                     name: existingUser.name,
-                    created_at: existingUser.created_at,
+                    created_at: existingUser.createdAt?.toISOString(),
                 };
             }
             return token;
@@ -77,9 +77,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return {
                 ...session,
                 user: {
-                    id: token.id as string,
-                    name: token.name as string,
-                    created_at: token.created_at as string
+                    id: token.id,
+                    name: token.name,
+                    created_at: token.created_at
                 }
             };
         }

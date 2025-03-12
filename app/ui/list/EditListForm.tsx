@@ -6,7 +6,7 @@ import { State } from '@/app/lib/actions';
 import { useActionState } from 'react';
 
 export default function EditListForm({ list }: { list: ListForm; }) {
-  const updateListWithId = updateList.bind(null, list.id);
+  const updateListWithId = updateList.bind(null, list.id.toString());
   //const [name, setName] = useState(list.name);
   //const [description, setDescription] = useState(list.description);
   const initialState: State = { message: null, errors: {} };
@@ -34,7 +34,7 @@ export default function EditListForm({ list }: { list: ListForm; }) {
           <textarea
             id="description"
             name="description"
-            defaultValue={list.description}
+            defaultValue={list.description!}
             rows={4}
             className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${state.errors?.description ? 'border-red-500' : 'border-gray-300'}`}
           />
