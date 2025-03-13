@@ -16,7 +16,6 @@
     "@google/generative-ai": "^0.21.0",
     "@heroicons/react": "^2.2.0",
     "@neondatabase/serverless": "^0.10.4",
-    "@types/bcrypt": "^5.0.2",
     "@vercel/postgres": "^0.9.0",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.7",
@@ -29,6 +28,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.51.0",
+    "@types/bcrypt": "^5.0.2",
     "@types/node": "^20",
     "@types/react": "19.0.0",
     "@types/react-dom": "19.0.0",
