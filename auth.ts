@@ -7,14 +7,43 @@ import { User } from './app/lib/definitions';
 import { getUser } from './app/lib/data';
 import { createUser } from './app/lib/actions';
 import bcrypt from "bcrypt";
+import { JWT } from "next-auth/jwt"
+import { Session, DefaultSession } from "next-auth"
+
+// Define return types
+type AuthorizeReturn = {
+    id: string;
+    name: string;
+    email: string;
+    created_at: string;
+} | null;
+
+type JWTCallback = JWT & {
+    id?: string;
+    created_at?: string | undefined;
+};
+
+declare module "next-auth" {
+    interface Session extends DefaultSession {
+        user: {
+            id?: string;
+            name?: string | null;
+            email?: string | null;
+            created_at?: string | undefined;
+        } & DefaultSession["user"];
+    }
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig,
     providers: [
         GitHub,
         Credentials({
-            async authorize(credentials) {
-                const parsedCredentials = z.object({ email: z.string().email({ message: "Not an email" }), password: z.string().min(6, { message: "Password must be at least 6 characters long" }) })
-                    .safeParse(credentials);
+            async authorize(credentials): Promise<AuthorizeReturn> {
+                const parsedCredentials = z.object({ 
+                    email: z.string().email({ message: "Not an email" }), 
+                    password: z.string().min(6, { message: "Password must be at least 6 characters long" }) 
+                }).safeParse(credentials);
 
                 if (parsedCredentials.success) {
                     const { email, password } = parsedCredentials.data;
@@ -23,8 +52,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     const passwordsMatch = await bcrypt.compare(password, user.password!);
 
                     if (passwordsMatch) {
-                       // console.log('Credentials are valid', user);
-                        return{
+                        return {
                             id: user.id!.toString(),
                             name: user.name!,
                             email: user.email!,
@@ -32,14 +60,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         };
                     }
                 }
-                //console.log('Invalid credentials');
                 return null;
             },
-        })],
+        })
+    ],
     callbacks: {
-        async jwt({ token, user}) {
-            //console.log('jwt callback - trying to access email');
-            //console.log("Inside jwt call back" , user);
+        async jwt({ token, user }): Promise<JWTCallback> {
             if (user && user.email && user.name) {
                 const email = user.email;
                 // Check if a user with this email already exists
@@ -66,26 +92,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 return {
                     ...token,
                     id: existingUser.id?.toString(),
-                    name: existingUser.name,
                     created_at: existingUser.createdAt?.toISOString(),
                 };
             }
             return token;
         },
-        async session({ session, token, user }) {
-            //console.log('session callback - trying to access email', token);
+        async session({ session, token }): Promise<Session> {
             return {
                 ...session,
                 user: {
-                    id: token.id,
+                    id: (token as JWTCallback).id,
                     name: token.name,
-                    created_at: token.created_at
-                }
+                    created_at: token.created_at as string | undefined
+                },
+                expires: session.expires
             };
         }
     },
     session: {
         strategy: "jwt"
     },
-    experimental: { enableWebAuthn: true },
 });
