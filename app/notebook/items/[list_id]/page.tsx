@@ -22,7 +22,7 @@ export default async function ItemsPage({ params }: { params: Promise<{ list_id:
   }
   console.log(listUsers);
   const listName = list.name;
-  const currentUserId = session?.user?.id;
+  const currentUserId = session.user?.id || '';
   const items = await fetchItems(a.list_id);
   console.log(items);
   // 
