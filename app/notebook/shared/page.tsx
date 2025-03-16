@@ -8,7 +8,7 @@ export default async function SharedPage() {
   const session = await auth();
   if (!session?.user) return null;
 
-  const sharedLists = await fetchSharedLists(session.user.id);
+  const sharedLists = await fetchSharedLists(session.user?.id || "");
   const assignedCount = await getAssignedItemsCount(session?.user?.id || '');
 
   return (
@@ -20,9 +20,9 @@ export default async function SharedPage() {
               <ListCard
                 key={list.id}
                 title={list.name}
-                description={list.description}
-                list_id={list.id}
-                user_id={list.user_id}
+                description={list.description!}
+                list_id={list.id.toString()}
+                user_id={list.userId.toString()}
               />
             </Suspense>
           ))}

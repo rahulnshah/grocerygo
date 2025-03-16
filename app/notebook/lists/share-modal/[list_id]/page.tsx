@@ -10,6 +10,6 @@ export default async function Page({ params, searchParams }: { params: Promise<{
   console.log("a", a);
   console.log("sParams", sParams);
   return (
-    <ShareModal listId={a.list_id} ownerId={session.user.id} searchParams={sParams?.query || ''} />
+    <ShareModal listId={a.list_id} ownerId={session.user?.id || ""} searchParams={sParams?.query || ''} />
   )
 }
