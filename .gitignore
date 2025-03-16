@@ -36,6 +36,18 @@ yarn-error.log*
 next-env.d.ts
 node_modules
 
+# Playwright specific
 /test-results/
 /playwright-report/
+/blob-report/
 /playwright/.cache/
+/test-results/
+/playwright/.auth/
+
+# Browser-specific directories
+.blob-report
+.test-results
+
+# Screenshots and videos from test runs
+**/screenshots/
+**/videos/
