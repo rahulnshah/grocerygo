@@ -7,11 +7,11 @@ import { useSession } from 'next-auth/react';
 import { auth } from '@/auth';
 
 const ToBuyItem = async ({ item }: { item: ItemForm }) => {
-  const listUsers = await getListUsers(item.list_id);
+  const listUsers = await getListUsers(item.listId.toString());
   const session = await auth();
   
   return (
-    <div className={`w-full rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 ${item.is_checked ? 'bg-orange-500' : 'bg-white'}`}>
+    <div className={`w-full rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 ${item.isChecked ? 'bg-orange-500' : 'bg-white'}`}>
       <div className="flex-1">
         <EditItemForm 
           item={item} 
@@ -20,7 +20,7 @@ const ToBuyItem = async ({ item }: { item: ItemForm }) => {
         />
       </div>
       <div className="flex justify-between items-center mt-auto">
-        <DeleteItem id={item.id} list_id={item.list_id} />
+        <DeleteItem id={item.id.toString()} list_id={item.listId.toString()} />
       </div>
     </div>
   );

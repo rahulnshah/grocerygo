@@ -1,5 +1,7 @@
 'use server';
-import { sql } from '@vercel/postgres';
+import { drizzle } from 'drizzle-orm/neon-http';
+import { and, eq, ilike, ne, notInArray, count, desc, or, isNull } from 'drizzle-orm';
+import { lists, items, users, sharedLists, favorites } from './schema';
 import {
   Item,
   FavoriteList,
@@ -8,23 +10,27 @@ import {
   ItemForm,
   User,
   SharedList,
+  ItemWithAssignee,
   ListWithCounts
 } from './definitions';
-
-import { PriorityQueue } from '@datastructures-js/priority-queue';
-
 import { unstable_noStore as noStore } from 'next/cache';
+
+const database = drizzle(process.env.DATABASE_URL!);
 
 export async function fetchNameOfList(list_id: string) {
   noStore();
   try {
-    const data = await sql<ListForm>`SELECT * FROM lists WHERE id = ${list_id}`;
-    return data.rows[0];
+    const data: List[] = await database
+      .select()
+      .from(lists)
+      .where(eq(lists.id, parseInt(list_id)));
+    return data[0];
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch list description.');
   }
 }
+
 export async function searchUsers(query: string, ownerId: string, listId: string) {
   noStore();
   if (!query || query.length < 2) {
@@ -32,28 +38,33 @@ export async function searchUsers(query: string, ownerId: string, listId: string
   }
 
   try {
-    const result = await sql<User>`
-      SELECT *
-      FROM users
-      WHERE (name ILIKE ${`%${query}%`} OR email ILIKE ${`%${query}%`}) AND id != ${ownerId}
-      AND id NOT IN (
-      SELECT shared_with_id 
-      FROM shared_lists 
-      WHERE list_id = ${listId}
-    )
-      AND id NOT IN (
-      SELECT owner_id
-      FROM shared_lists
-      WHERE list_id = ${listId}
-    )
-    `;
-    console.log('Result:', result.rows);
-    // const fuse = new Fuse(result.rows, {
-    //   keys: ['name', 'email']
-    // });
+    const sharedUserIds = await database
+      .select({ id: sharedLists.sharedWithId })
+      .from(sharedLists)
+      .where(eq(sharedLists.listId, parseInt(listId)));
 
-    // const searchResults = fuse.search(query).map(result => result.item);
-    return { users: result.rows };
+    const ownerIds = await database
+      .select({ id: sharedLists.ownerId })
+      .from(sharedLists)
+      .where(eq(sharedLists.listId, parseInt(listId)));
+
+    const excludeIds = [...sharedUserIds, ...ownerIds].map(u => u.id);
+
+    const result: User[] = await database
+      .select()
+      .from(users)
+      .where(
+        and(
+          ne(users.id, parseInt(ownerId)),
+          notInArray(users.id, excludeIds),
+          or(
+            ilike(users.name, `%${query}%`),
+            ilike(users.email, `%${query}%`)
+          )
+        )
+      );
+
+    return { users: result };
   } catch (error) {
     console.log(error);
     return { users: [], error: 'Failed to search users' };
@@ -63,10 +74,20 @@ export async function searchUsers(query: string, ownerId: string, listId: string
 export async function fetchSharedLists(owner_id: string) {
   noStore();
   try {
-    const data = await sql<List>`SELECT lists.id, lists.user_id, lists.name, lists.description FROM shared_lists
-      JOIN lists ON shared_lists.list_id = lists.id
-      WHERE shared_with_id = ${owner_id} LIMIT 20`;
-    return data.rows;
+    const data: List[] = await database
+      .select({
+        id: lists.id,
+        userId: lists.userId,
+        name: lists.name,
+        description: lists.description,
+        createdAt: lists.createdAt,
+        updatedAt: lists.updatedAt
+      })
+      .from(sharedLists)
+      .innerJoin(lists, eq(sharedLists.listId, lists.id))
+      .where(eq(sharedLists.sharedWithId, parseInt(owner_id)))
+      .limit(20);
+    return data;
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch lists.');
@@ -75,26 +96,43 @@ export async function fetchSharedLists(owner_id: string) {
 
 export async function getListSharedUsers(list_id: string, owner_id: string) {
   try {
-    const result = await sql`
-      SELECT u.id, u.name, u.email, sl.shared_at
-      FROM shared_lists sl
-      JOIN users u ON sl.shared_with_id = u.id
-      WHERE sl.list_id = ${list_id} AND sl.owner_id = ${owner_id}
-      ORDER BY sl.shared_at DESC;
-    `;
-    return { users: result.rows };
+    const result = await database
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        sharedAt: sharedLists.sharedAt
+      })
+      .from(sharedLists)
+      .innerJoin(
+        users,
+        eq(sharedLists.sharedWithId, users.id)
+      )
+      .where(
+        and(
+          eq(sharedLists.listId, parseInt(list_id)),
+          eq(sharedLists.ownerId, parseInt(owner_id))
+        )
+      )
+      .orderBy(desc(sharedLists.sharedAt));
+
+    return { users: result };
   } catch (error) {
     return { users: [], error: 'Failed to fetch shared users' };
   }
 }
+
 export async function fetchList(user_id: string) {
-  // Add noStore() here prevent the response from being cached.
-  // This is equivalent to in fetch(..., {cache: 'no-store'}).
   noStore();
 
   try {
-    const data = await sql<List>`SELECT * FROM lists WHERE lists.user_id = ${user_id} LIMIT 20`;
-    return data.rows;
+    const data: List[] = await database
+      .select()
+      .from(lists)
+      .where(eq(lists.userId, parseInt(user_id)))
+      .limit(20);
+
+    return data;
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch lists.');
@@ -104,20 +142,20 @@ export async function fetchList(user_id: string) {
 export async function fetchItems(list_id: string) {
   noStore();
   try {
-    const data = await sql<ItemForm>`
-      SELECT 
-        items.id, 
-        items.list_id, 
-        items.name, 
-        items.is_checked,
-        items.assigned_to,
-        users.name as assigned_to_name
-      FROM items 
-      LEFT JOIN users ON items.assigned_to = users.id
-      WHERE list_id = ${list_id} 
-      LIMIT 20
-    `;
-    return data.rows;
+    const data: ItemForm[] = await database
+      .select({
+        id: items.id,
+        listId: items.listId,
+        name: items.name,
+        isChecked: items.isChecked,
+        assignedTo: items.assignedTo,
+        assignedToName: users.name,
+      })
+      .from(items)
+      .leftJoin(users, eq(items.assignedTo, users.id))
+      .where(eq(items.listId, parseInt(list_id)))
+      .limit(20);
+    return data;
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error(`Failed to fetch items for list with list_id ${list_id}.`);
@@ -127,68 +165,65 @@ export async function fetchItems(list_id: string) {
 export async function fetchFavoriteLists(owner_id: string) {
   noStore();
   try {
-    const data = await sql<FavoriteList>`
-       SELECT
-        favorites.id,
-        lists.id,
-        lists.name,
-        lists.description
-      FROM 
-        favorites
-      JOIN 
-        lists ON favorites.list_id = lists.id
-      JOIN
-        users on favorites.user_id = users.id
-      WHERE
-        favorites.user_id = ${owner_id}
-      LIMIT 6`;
+    const data: FavoriteList[] = await database
+      .select({
+        id: favorites.id,
+        listId: lists.id,
+        name: lists.name,
+        description: lists.description
+      })
+      .from(favorites)
+      .innerJoin(lists, eq(favorites.listId, lists.id))
+      .innerJoin(users, eq(favorites.userId, users.id))
+      .where(eq(favorites.userId, parseInt(owner_id)))
+      .limit(6);
 
-    return data.rows;
+    return data;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch the latest invoices.');
+    throw new Error('Failed to fetch favorite lists.');
   }
 }
 
 export async function fetchListData(id: string) {
   noStore();
   try {
-    const checkedItemsCountPromise = await sql`
-      SELECT 
-        COUNT(*)
-      FROM 
-        items
-      WHERE 
-        list_id = ${id} AND is_checked = true
-    `;
-    const itemsCountPromise = await sql`
-    SELECT 
-      COUNT(*)
-    FROM 
-      items
-    WHERE 
-      list_id = ${id}
-  `;
-    const data = await Promise.all([itemsCountPromise, checkedItemsCountPromise]);
-    const numItems = Number(data[0].rows[0].count ?? '0');
-    const numCheckedItems = Number(data[1].rows[0].count ?? '0');
+    const checkedItems = await database
+      .select({ value: count() })
+      .from(items)
+      .where(and(
+        eq(items.listId, parseInt(id)),
+        eq(items.isChecked, true)
+      ));
 
-    return { numItems, numCheckedItems };
-  }
-  catch (error) {
+    const totalItems = await database
+      .select({ value: count() })
+      .from(items)
+      .where(eq(items.listId, parseInt(id)));
+
+    return {
+      numItems: Number(totalItems[0].value),
+      numCheckedItems: Number(checkedItems[0].value)
+    };
+  } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch list card data.');
   }
-
 }
 
 export async function fetchListById(id: string) {
   noStore();
   try {
-    const data = await sql<ListForm>`SELECT lists.id, lists.name, lists.description FROM lists WHERE id = ${id}`;
-    return data.rows[0];
-  }
-  catch (error) {
+    const data: ListForm[] = await database
+      .select({
+        id: lists.id,
+        name: lists.name,
+        description: lists.description
+      })
+      .from(lists)
+      .where(eq(lists.id, parseInt(id)));
+    return data[0];
+  } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch list.');
   }
@@ -197,29 +232,25 @@ export async function fetchListById(id: string) {
 export async function isFavorited(list_id: string): Promise<boolean> {
   noStore();
   try {
-    const result = await sql`
-    SELECT COUNT(*) > 0 AS is_favorited
-    FROM favorites
-    WHERE list_id = ${list_id};
-  `;
-
-    const isFavorited = result.rows[0]?.is_favorited || false;
-
-    return isFavorited;
-  }
-  catch (error) {
+    const result = await database
+      .select({ value: count() })
+      .from(favorites)
+      .where(eq(favorites.listId, parseInt(list_id)));
+    
+    return Number(result[0].value) > 0;
+  } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to check if list is favorited.');
   }
 }
 
-
 export async function getUser(email: string) {
   try {
-    const user = await sql<User>`SELECT * FROM users WHERE email=${email}`;
-    let row = user.rows[0];
-    // console.log('User:', row);
-    return row;
+    const user: User[] = await database
+      .select()
+      .from(users)
+      .where(eq(users.email, email));
+    return user[0];
   } catch (error) {
     console.error('Failed to fetch user:', error);
     throw new Error('Failed to fetch user.');
@@ -229,23 +260,32 @@ export async function getUser(email: string) {
 export async function getListUsers(list_id: string) {
   noStore();
   try {
-    const result = await sql<User>`
-      SELECT 
-        u.id,
-        u.name,
-        u.email,
-        u.created_at,
-        CASE 
-          WHEN l.user_id = u.id THEN true
-          ELSE false
-        END as is_owner
-      FROM lists l
-      LEFT JOIN shared_lists sl ON l.id = sl.list_id
-      LEFT JOIN users u ON sl.shared_with_id = u.id OR l.user_id = u.id
-      WHERE l.id = ${list_id}
-      GROUP BY u.id, u.name, u.email, l.user_id;
-    `;
-    return result.rows;
+    // get all users who have access to the list and the owner of the list as well
+    const result: User[] = await database
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        password: users.password,
+        createdAt: users.createdAt
+      })
+      .from(sharedLists)
+      .innerJoin(users, eq(sharedLists.sharedWithId, users.id))
+      .where(eq(sharedLists.listId, parseInt(list_id)))
+      .union(
+          database
+            .select({
+              id: users.id,
+              name: users.name,
+              email: users.email,
+              password: users.password,
+              createdAt: users.createdAt
+            })
+            .from(lists)
+            .innerJoin(users, eq(lists.userId, users.id))
+            .where(eq(lists.id, parseInt(list_id)))
+        );
+    return result;
   } catch (error) {
     console.error('Database Error:', error);
     return [];
@@ -255,15 +295,19 @@ export async function getListUsers(list_id: string) {
 export async function getAssignedItemsCount(userId: string) {
   noStore();
   try {
-    const result = await sql`
-      SELECT COUNT(*) 
-      FROM items i
-      JOIN lists l ON i.list_id = l.id
-      JOIN shared_lists sl ON l.id = sl.list_id
-      WHERE i.assigned_to = ${userId}
-        AND sl.shared_with_id = ${userId}
-    `;
-    return Number(result.rows[0].count);
+    const result = await database
+      .select({ value: count() })
+      .from(items)
+      .innerJoin(lists, eq(items.listId, lists.id))
+      .innerJoin(sharedLists, eq(lists.id, sharedLists.listId))
+      .where(
+        and(
+          eq(items.assignedTo, parseInt(userId)),
+          eq(sharedLists.sharedWithId, parseInt(userId))
+        )
+      );
+    
+    return Number(result[0].value);
   } catch (error) {
     console.error('Database Error:', error);
     return 0;
@@ -273,20 +317,25 @@ export async function getAssignedItemsCount(userId: string) {
 export async function fetchListsWithCounts(user_id: string) {
   noStore();
   try {
-    const data = await sql<ListWithCounts>`
-      SELECT 
-        l.*,
-        COUNT(i.id) as item_count
-      FROM lists l
-      LEFT JOIN items i ON l.id = i.list_id
-      WHERE l.user_id = ${user_id}
-      GROUP BY l.id
-      ORDER BY l.created_at DESC
-    `;
+    const data: ListWithCounts[] = await database
+      .select({
+        id: lists.id,
+        userId: lists.userId,
+        name: lists.name,
+        description: lists.description,
+        createdAt: lists.createdAt,
+        updatedAt: lists.updatedAt,
+        itemCount: count(items.id)
+      })
+      .from(lists)
+      .leftJoin(items, eq(lists.id, items.listId))
+      .where(eq(lists.userId, parseInt(user_id)))
+      .groupBy(lists.id)
+      .orderBy(desc(lists.createdAt));
 
-    return data.rows.map(list => ({
+    return data.map(list => ({
       ...list,
-      item_count: Number(list.item_count)
+      item_count: Number(list.itemCount)
     }));
   } catch (error) {
     console.error('Database Error:', error);
@@ -297,9 +346,9 @@ export async function fetchListsWithCounts(user_id: string) {
 export async function fetchTopKFrequentLists(k: number, user_id: string) {
   noStore();
   try {
-    const lists: ListWithCounts[] = await fetchListsWithCounts(user_id);
-    lists.sort((a, b) => b.item_count - a.item_count);
-    return lists.slice(0, k);
+    const myLists: ListWithCounts[] = await fetchListsWithCounts(user_id);
+    myLists.sort((a, b) => b.itemCount - a.itemCount);
+    return myLists.slice(0, k);
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch top k frequent lists.');
@@ -309,8 +358,12 @@ export async function fetchTopKFrequentLists(k: number, user_id: string) {
 export async function fetchTotalNumberOfLists(user_id: string) {
   noStore();
   try {
-    const lists = await sql`SELECT COUNT(*) FROM lists WHERE user_id = ${user_id}`;
-    return Number(lists.rows[0].count);
+    const result = await database
+      .select({ value: count() })
+      .from(lists)
+      .where(eq(lists.userId, parseInt(user_id)));
+    
+    return Number(result[0].value);
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch total number of lists.');

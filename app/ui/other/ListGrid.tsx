@@ -17,9 +17,9 @@ const ListGrid = async ({ lists }: { lists: ListWithCounts[] | List[]  }) => {
             <Suspense key={list.id} fallback={<ListCardSkeleton />}>
               <ListCard
                 title={list.name}
-                description={list.description}
-                list_id={list.id}
-                user_id={list.user_id}
+                description={list.description!}
+                list_id={list.id.toString()}
+                user_id={list.userId.toString()}
               />
             </Suspense>
           ))

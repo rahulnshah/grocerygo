@@ -7,21 +7,24 @@ import { getListUsers } from '@/app/lib/data';
 import { auth } from '@/auth';
 import { Suspense } from 'react';
 import ToBuyItemSkeleton from '@/app/ui/other/ToBuyItemSkeleton';
-
+import { User } from '@/app/lib/definitions';
 export default async function ItemsPage({ params }: { params: Promise<{ list_id: string }>}) {
   const session = await auth();
   if (!session) {
     notFound();
   }
+  console.log(session)
   const a = await params;
-  const listUsers = await getListUsers(a.list_id);
+  const listUsers: User[] = await getListUsers(a.list_id);
   const list = await fetchListById(a.list_id);
   if (!list) {
     notFound();
   }
+  console.log(listUsers);
   const listName = list.name;
-  const currentUserId = session?.user?.id;
+  const currentUserId = session.user?.id || '';
   const items = await fetchItems(a.list_id);
+  console.log(items);
   // 
   return (
     <div className="flex justify-between p-6">
