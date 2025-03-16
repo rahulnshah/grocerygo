@@ -26,10 +26,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     if (passwordsMatch) {
                        // console.log('Credentials are valid', user);
                         return{
-                            _id: user.id.toString(),
-                            _name: user.name,
-                            _email: user.email,
-                            _created_at: user.createdAt.toISOString(),
+                            id: user.id.toString(),
+                            name: user.name,
+                            email: user.email,
+                            created_at: user.createdAt.toISOString(),
                         };
                     }
                 }
