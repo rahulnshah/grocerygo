@@ -8,7 +8,7 @@ export default async function SharedPage() {
   const session = await auth();
   if (!session?.user) return null;
 
-  const sharedLists = await fetchSharedLists(session.user.id);
+  const sharedLists = await fetchSharedLists(session.user?.id || "");
   const assignedCount = await getAssignedItemsCount(session?.user?.id || '');
 
   return (

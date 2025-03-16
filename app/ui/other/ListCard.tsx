@@ -23,7 +23,7 @@ const ListCard = async ({ title, description, list_id, user_id }: ListCardProps)
 
   if (!session?.user) return null;
   //console.log("Session is " ,session);
-  const owner_id = session.user.id;
+  const owner_id = session.user?.id || '';
   // console.log("owner_id is ", owner_id);
   // console.log("user_id is ", user_id);
   const isOwner = owner_id === user_id;
