@@ -6,14 +6,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug"
   },
   "dependencies": {
     "@datastructures-js/priority-queue": "^6.3.1",
     "@google/generative-ai": "^0.21.0",
     "@heroicons/react": "^2.2.0",
     "@neondatabase/serverless": "^0.10.4",
-    "@types/bcrypt": "^5.0.2",
     "@vercel/postgres": "^0.9.0",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.7",
@@ -25,6 +27,8 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.51.0",
+    "@types/bcrypt": "^5.0.2",
     "@types/node": "^20",
     "@types/react": "19.0.0",
     "@types/react-dom": "19.0.0",
