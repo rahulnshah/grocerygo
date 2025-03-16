@@ -7,6 +7,7 @@ import { User } from './app/lib/definitions';
 import { getUser } from './app/lib/data';
 import { createUser } from './app/lib/actions';
 import bcrypt from "bcrypt";
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig,
     providers: [
@@ -25,10 +26,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     if (passwordsMatch) {
                        // console.log('Credentials are valid', user);
                         return{
-                            id: user.id!.toString(),
-                            name: user.name!,
-                            email: user.email!,
-                            created_at: user.createdAt!.toISOString(),
+                            _id: user.id.toString(),
+                            _name: user.name,
+                            _email: user.email,
+                            _created_at: user.createdAt.toISOString(),
                         };
                     }
                 }
@@ -65,9 +66,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 // return all the stuff for the session for that same user
                 return {
                     ...token,
-                    id: existingUser.id?.toString(),
-                    name: existingUser.name,
-                    created_at: existingUser.createdAt?.toISOString(),
+                    id: existingUser.id.toString(),
+                    name: existingUser.name as string,
+                    created_at: existingUser.createdAt.toISOString(),
                 };
             }
             return token;

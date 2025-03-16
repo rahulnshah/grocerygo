@@ -5,11 +5,11 @@ import {
 
 // Users Table
 export const users = pgTable("users", {
-    id: serial("id").primaryKey(),
-    email: varchar("email", { length: 255 }).unique(),
-    password: varchar("password", { length: 255 }),
-    name: varchar("name", { length: 255 }),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    id: serial("id").primaryKey().notNull(),
+    email: varchar("email", { length: 255 }).unique().notNull(),
+    password: varchar("password", { length: 255 }).notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   });
   
   // Lists Table
