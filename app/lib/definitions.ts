@@ -1,11 +1,11 @@
 // This file contains type definitions based on the Drizzle schema
 
 export type User = {
-    id: number | null;
-    email: string | null;
-    password: string | null;
-    name: string | null;
-    createdAt: Date | null;
+    id: number;
+    email: string;
+    password: string ;
+    name: string;
+    createdAt: Date;
 };
 
 export type List = {

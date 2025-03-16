@@ -232,7 +232,7 @@ export async function createUser(prevState: UserState, formData: FormData) {
 
   // Prepare data for insertion into the database
   const { name, email, password } = validatedFields.data;
-  const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+  const hashedPassword = password ? await bcrypt.hash(password, 10) : '';
 
   try {
     await database.insert(users).values({
@@ -264,7 +264,7 @@ export async function createUserAndRedirectToLogin(prevState: UserState, formDat
   const { name, email, password } = validatedFields.data;
 
   try {
-    const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+    const hashedPassword = password ? await bcrypt.hash(password, 10) : "";
 
     const existingUser = await database
       .select()
@@ -277,8 +277,8 @@ export async function createUserAndRedirectToLogin(prevState: UserState, formDat
     }
 
     await database.insert(users).values({
-      name,
-      email,
+      name: name,
+      email: email,
       password: hashedPassword
     });
   } catch (error) {
